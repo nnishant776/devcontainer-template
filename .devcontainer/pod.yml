@@ -32,5 +32,5 @@ spec:
         path: /usr/share/zoneinfo/UTC # Change this to your desired timezone
     - name: source_code
       hostPath:
-        path: /path/to/your/project/on/disk
+        path: ../
 ---
