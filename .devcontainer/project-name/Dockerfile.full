@@ -1,0 +1,26 @@
+FROM golang:latest
+
+WORKDIR ~
+
+RUN apt -y update
+
+RUN apt -y install \
+    systemd \
+    git \
+    tree \
+    curl \
+    nano \
+    python3-pip \
+    unzip \
+    tar \
+    gzip \
+    make
+
+RUN apt -y clean all
+
+ENV PS1="[\u@\h \W]# "
+
+COPY Makefile.full Makefile
+
+# Optional. Remove or change to something else based on the requirements
+RUN make postcreate
