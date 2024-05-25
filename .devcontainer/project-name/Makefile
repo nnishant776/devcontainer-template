@@ -21,7 +21,7 @@ editortools:
 	rm -rf ~/fd-musl_8.7.0_amd64.deb
 	rm -rf ~/ripgrep_13.0.0_amd64.deb
 
-editor: editorconfig editortools
+editorapp:
 	curl -G -L https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz -o ~/nvim-linux64.tar.gz
 	mkdir -p ~/nvim-linux64
 	tar -C ~/nvim-linux64 --strip-components=1 -xf ~/nvim-linux64.tar.gz
@@ -30,3 +30,5 @@ editor: editorconfig editortools
 	rm -rf ~/nvim-linux64.tar.gz
 	rm -rf ~/nvim-linux64
 	env features=ide nvim --headless "+Lazy restore" "+TSUpdateSync" "+qa"
+
+editor: editorconfig editortools
