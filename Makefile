@@ -78,6 +78,21 @@ else
 	devcontainer up --docker-path $(runtime) && devcontainer open
 endif
 
+enventer:
+ifeq ($(strip $(editor)), cli)
+ifeq ($(strip $(infra)), pod)
+	podman exec -it -w /workspace $(project_name)-$(container_name) bash
+else
+ifeq ($(strip $(runtime)), podman)
+	podman-compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
+else
+	docker compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
+endif
+endif
+else
+	# devcontainer exec --docker-path $(runtime) && devcontainer open
+endif
+
 envstop:
 ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
