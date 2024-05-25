@@ -2,21 +2,21 @@ FROM debian:latest
 
 WORKDIR ~
 
-RUN apt -y update
-
-RUN apt -y install --no-install-recommends \
-    systemd \
-    git \
-    tree \
-    curl \
-    nano \
-    python3-pip \
-    unzip \
-    tar \
-    gzip \
-    make
-
-RUN apt -y clean all
+# RUN apt -y update
+#
+# RUN apt -y install --no-install-recommends \
+#     systemd \
+#     git \
+#     tree \
+#     curl \
+#     nano \
+#     python3-pip \
+#     unzip \
+#     tar \
+#     gzip \
+#     make
+#
+# RUN apt -y clean all
 
 ENV PS1="[\u@\h \W]# "
 
