@@ -4,7 +4,7 @@ WORKDIR ~
 
 RUN apt -y update
 
-RUN apt -y install \
+RUN apt -y install --no-install-recommends \
     systemd \
     git \
     tree \
@@ -20,7 +20,7 @@ RUN apt -y clean all
 
 ENV PS1="[\u@\h \W]# "
 
-COPY Makefile.minimal Makefile
+COPY project-name/Makefile Makefile
 
 # Optional. Remove or change to something else based on the requirements
 RUN make postcreate

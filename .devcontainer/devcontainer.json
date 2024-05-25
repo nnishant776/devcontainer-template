@@ -2,7 +2,7 @@
     "name": "project-name",
     "build": {
         "dockerfile": "project-name/Dockerfile",
-        "context": "project-name"
+        "context": "."
     },
     "capAdd": [
         "SYS_PTRACE"

@@ -3,8 +3,8 @@ services:
   development:
     image: project-name:dev
     build:
-      context: project-name
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: project-name/Dockerfile
     cap_add:
       - SYS_PTRACE # Add more capabilities based on the requirements
     command: [ "/lib/systemd/systemd" ] # Optional. Remove if you don't want systemd
