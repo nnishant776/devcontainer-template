@@ -12,6 +12,7 @@ RUN apt -y install --no-install-recommends \
     unzip \
     tar \
     gzip \
-    make
+    make \
+    file
 
 RUN apt -y clean all
