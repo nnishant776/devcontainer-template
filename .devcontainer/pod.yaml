@@ -9,7 +9,7 @@ metadata:
     app: "project-name"
 spec:
   containers:
-  - name: dev
+  - name: container-name
     image: "localhost/project-name:dev"
     securityContext:
       privileged: true

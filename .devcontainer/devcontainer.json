@@ -20,7 +20,7 @@
     ],
     "runArgs": [
         "--name",
-        "vscode-project-name",
+        "vscode-container-name",
         "--network=host",
         "--userns=host"
     ],
