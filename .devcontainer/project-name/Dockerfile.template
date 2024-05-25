@@ -1,0 +1,10 @@
+FROM localhost/project-name:base
+
+WORKDIR ~
+
+ENV PS1="[\u@\h \W]# "
+
+COPY project-name/Makefile Makefile
+
+# Optional. Remove or change to something else based on the requirements
+RUN make postcreate

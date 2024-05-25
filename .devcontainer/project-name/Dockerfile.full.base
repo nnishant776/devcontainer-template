@@ -1,0 +1,17 @@
+FROM golang:latest
+
+RUN apt -y update
+
+RUN apt -y install --no-install-recommends \
+    systemd \
+    git \
+    tree \
+    curl \
+    nano \
+    python3-pip \
+    unzip \
+    tar \
+    gzip \
+    make
+
+RUN apt -y clean all
