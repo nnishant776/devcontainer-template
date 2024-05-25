@@ -42,6 +42,7 @@ _setup_vscode: baseimage
 _setup_pod: baseimage
 ifeq ($(strip $(runtime)), podman)
 	sed -i "s/container-name/$(container_name)/g" .devcontainer/pod.yaml
+	sed -i "s/$(project_name)\///g" .devcontainer/$(project_name)/Dockerfile
 	cd .devcontainer && podman kube play --build --replace pod.yaml && cd - # Ensure that the podman cli is installed
 else
 	echo "Invalid runtime and infra combination"
