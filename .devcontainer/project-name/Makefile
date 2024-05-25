@@ -29,6 +29,6 @@ editorapp:
 	cp -rf ~/nvim-linux64/* /usr/local/
 	rm -rf ~/nvim-linux64.tar.gz
 	rm -rf ~/nvim-linux64
-	env features=ide nvim --headless "+Lazy restore" "+TSUpdateSync" "+qa"
 
-editor: editorconfig editortools
+editor: editorconfig editortools editorapp
+	env features=ide nvim --headless "+Lazy restore" "+TSUpdateSync" "+qa"
