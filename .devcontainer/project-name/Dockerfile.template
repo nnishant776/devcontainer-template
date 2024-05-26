@@ -1,6 +1,6 @@
 FROM localhost/project-name:base
 
-WORKDIR ~
+WORKDIR /root
 
 ENV PS1="[\u@\h \W]# "
 
