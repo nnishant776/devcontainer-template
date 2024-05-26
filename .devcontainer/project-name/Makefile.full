@@ -1,4 +1,4 @@
-postcreate: envconfig editor
+postcreate: envconfig editor devtools
 
 envconfig:
 	cd ~
@@ -20,6 +20,17 @@ editortools:
 	apt -y install ~/fd-musl_8.7.0_amd64.deb
 	rm -rf ~/fd-musl_8.7.0_amd64.deb
 	rm -rf ~/ripgrep_13.0.0_amd64.deb
+
+gittools: arch = $(shell dpkg --print-architecture)
+gittools:
+	mkdir -p -m 755 /etc/apt/keyrings \
+	&& curl -G -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& echo "deb [arch=$(arch) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+	&& apt update \
+	&& apt install gh -y
+
+devtools:
 	go install "github.com/cweill/gotests/gotests@latest"
 	go install "github.com/fatih/gomodifytags@latest"
 	go install "github.com/josharian/impl@latest"
