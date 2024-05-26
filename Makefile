@@ -8,6 +8,8 @@ infra = pod # pod, compose (pod is only supported with podman)
 container_name = ${project_name}-dev
 optimized = true # If set to true, this will look for existing image localhost/project-name:dev and use it for the new image
 
+all:
+
 devcontainer:
 ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
