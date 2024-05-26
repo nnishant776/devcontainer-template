@@ -4,8 +4,9 @@ project_name = project-name
 flavor = full # full,minimal
 runtime = podman # podman, docker
 editor = cli # cli, vscode
-infra = pod # pod, compose
+infra = pod # pod, compose (pod is only supported with podman)
 container_name = ${project_name}-dev
+optimized = true # If set to true, this will look for existing image localhost/project-name:dev and use it for the new image
 
 devcontainer:
 ifeq ($(strip $(editor)), cli)
@@ -24,24 +25,27 @@ _prebuild:
 	sed -i "s/project-name/$(project_name)/g" .devcontainer/docker-compose.yaml
 	sed -i "s/project-name/$(project_name)/g" .devcontainer/pod.yaml
 	sed -i "s/project-name/$(project_name)/g" .devcontainer/devcontainer.json
+	sed -i "s/container-name/$(container_name)/g" .devcontainer/devcontainer.json
+	sed -i "s/container-name/$(container_name)/g" .devcontainer/pod.yaml
+	sed -i "s/container-name/$(container_name)/g" .devcontainer/docker-compose.yaml
 	cp .devcontainer/$(project_name)/Dockerfile.template .devcontainer/$(project_name)/Dockerfile
 
 ifeq ($(strip $(flavor)), full)
 	cp .devcontainer/$(project_name)/Dockerfile.full.base .devcontainer/$(project_name)/Dockerfile.base
+	cp .devcontainer/$(project_name)/Makefile.full .devcontainer/$(project_name)/Makefile
 else
 	cp .devcontainer/$(project_name)/Dockerfile.minimal.base .devcontainer/$(project_name)/Dockerfile.base
+	cp .devcontainer/$(project_name)/Makefile.minimal .devcontainer/$(project_name)/Makefile
 endif
 
 baseimage: _prebuild
 	$(runtime) build -f .devcontainer/$(project_name)/Dockerfile.base -t localhost/$(project_name):base .devcontainer
 
 _setup_vscode: baseimage
-	sed -i "s/container-name/$(container_name)/g" .devcontainer/devcontainer.json
 	devcontainer up --docker-path $(runtime) # Ensure that devcontainer cli is installed (sudo npm install -g @devcontainers/cli)
 
 _setup_pod: baseimage
 ifeq ($(strip $(runtime)), podman)
-	sed -i "s/container-name/$(container_name)/g" .devcontainer/pod.yaml
 	sed -i "s/$(project_name)\///g" .devcontainer/$(project_name)/Dockerfile
 	cd .devcontainer && podman kube play --build --replace pod.yaml && cd - # Ensure that the podman cli is installed
 else
@@ -50,7 +54,6 @@ else
 endif
 
 _setup_compose: baseimage
-	sed -i "s/container-name/$(container_name)/g" .devcontainer/docker-compose.yaml
 ifeq ($(strip $(runtime)), podman)
 	podman-compose -f .devcontainer/docker-compose.yaml up --build -d # Ensure that podman-compose is installed (python3 -m pip install podman-compose)
 else
