@@ -1,5 +1,6 @@
 {
     "name": "project-name",
+    "image": "localhost/project-name:dev"
     "build": {
         "dockerfile": "project-name/Dockerfile",
         "context": "."

@@ -1,7 +1,7 @@
 version: '3'
 services:
   development:
-    image: project-name:dev
+    image: localhost/project-name:dev
     build:
       context: .
       dockerfile: project-name/Dockerfile

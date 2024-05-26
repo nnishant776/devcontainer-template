@@ -1,7 +1,7 @@
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
 project_name = project-name
-flavor = full # full,minimal
+flavor = full # full, minimal
 runtime = podman # podman, docker
 editor = cli # cli, vscode
 infra = pod # pod, compose (pod is only supported with podman)
