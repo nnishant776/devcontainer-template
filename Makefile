@@ -40,6 +40,7 @@ endif
 
 baseimage: _prebuild
 	$(runtime) build -f .devcontainer/$(project_name)/Dockerfile.base -t localhost/$(project_name):base .devcontainer
+	$(runtime) build -f .devcontainer/$(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .devcontainer
 
 _setup_vscode: baseimage
 	devcontainer up --docker-path $(runtime) # Ensure that devcontainer cli is installed (sudo npm install -g @devcontainers/cli)
