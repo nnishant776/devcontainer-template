@@ -34,9 +34,11 @@ _prebuild:
 
 ifeq ($(strip $(flavor)), full)
 	cp .devcontainer/$(project_name)/Dockerfile.full.base .devcontainer/$(project_name)/Dockerfile.base
+	cp .devcontainer/$(project_name)/Dockerfile.full.dev .devcontainer/$(project_name)/Dockerfile.dev
 	cp .devcontainer/$(project_name)/Makefile.full .devcontainer/$(project_name)/Makefile
 else
 	cp .devcontainer/$(project_name)/Dockerfile.minimal.base .devcontainer/$(project_name)/Dockerfile.base
+	cp .devcontainer/$(project_name)/Dockerfile.minimal.dev .devcontainer/$(project_name)/Dockerfile.dev
 	cp .devcontainer/$(project_name)/Makefile.minimal .devcontainer/$(project_name)/Makefile
 endif
 
@@ -57,11 +59,7 @@ else
 endif
 
 _setup_compose: baseimage
-ifeq ($(strip $(runtime)), podman)
-	podman-compose -f .devcontainer/docker-compose.yaml up -d # Ensure that podman-compose is installed (python3 -m pip install podman-compose)
-else
-	docker compose --progress plain -f .devcontainer/docker-compose.yaml up -d # Ensure that the compose plugin is installed
-endif
+	$(runtime) compose -f .devcontainer/docker-compose.yaml up -d # Ensure that either of podman-compose or docker compose is installed
 
 .PHONY: list
 list:
@@ -70,15 +68,11 @@ list:
 envstart:
 ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
-	podman pod start $(project_name) && podman exec -it -w /workspace $(project_name)-$(container_name) bash
+	podman pod start $(project_name) && \
+	podman exec -it -w /workspace $(project_name)-$(container_name) bash
 else
-ifeq ($(strip $(runtime)), podman)
-	podman-compose -f .devcontainer/docker-compose.yaml up -d && \
-	podman-compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
-else
-	docker compose -f .devcontainer/docker-compose.yaml up -d && \
-	docker compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
-endif
+	$(runtime) compose -f .devcontainer/docker-compose.yaml up -d && \
+	$(runtime) compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
 endif
 else
 	devcontainer up --docker-path $(runtime) && devcontainer open
@@ -89,11 +83,7 @@ ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
 	podman exec -it -w /workspace $(project_name)-$(container_name) bash
 else
-ifeq ($(strip $(runtime)), podman)
-	podman-compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
-else
-	docker compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
-endif
+	$(runtime) compose -f .devcontainer/docker-compose.yaml exec -w /workspace development bash
 endif
 else
 	# devcontainer exec --docker-path $(runtime) && devcontainer open
@@ -104,11 +94,7 @@ ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
 	podman pod stop $(project_name)
 else
-ifeq ($(strip $(runtime)), podman)
-	podman-compose -f .devcontainer/docker-compose.yaml stop
-else
-	docker compose -f .devcontainer/docker-compose.yaml stop
-endif
+	$(runtime) compose -f .devcontainer/docker-compose.yaml stop
 endif
 else
 	# devcontainer up --docker-path $(runtime) && devcontainer open
@@ -119,11 +105,7 @@ ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
 	cd .devcontainer && podman kube play --down pod.yaml && cd -
 else
-ifeq ($(strip $(runtime)), podman)
-	podman-compose -f .devcontainer/docker-compose.yaml down
-else
-	docker compose -f .devcontainer/docker-compose.yaml down
-endif
+	$(runtime) compose -f .devcontainer/docker-compose.yaml down
 endif
 else
 	# devcontainer up --docker-path $(runtime) && devcontainer open
