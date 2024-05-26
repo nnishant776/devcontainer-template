@@ -47,7 +47,7 @@ _setup_vscode: baseimage
 _setup_pod: baseimage
 ifeq ($(strip $(runtime)), podman)
 	sed -i "s/$(project_name)\///g" .devcontainer/$(project_name)/Dockerfile
-	cd .devcontainer && podman kube play --build --replace pod.yaml && cd - # Ensure that the podman cli is installed
+	cd .devcontainer && podman kube play --replace pod.yaml && cd - # Ensure that the podman cli is installed
 else
 	echo "Invalid runtime and infra combination"
 	exit 1
@@ -55,9 +55,9 @@ endif
 
 _setup_compose: baseimage
 ifeq ($(strip $(runtime)), podman)
-	podman-compose -f .devcontainer/docker-compose.yaml up --build -d # Ensure that podman-compose is installed (python3 -m pip install podman-compose)
+	podman-compose -f .devcontainer/docker-compose.yaml up -d # Ensure that podman-compose is installed (python3 -m pip install podman-compose)
 else
-	docker compose --progress plain -f .devcontainer/docker-compose.yaml up --build -d # Ensure that the compose plugin is installed
+	docker compose --progress plain -f .devcontainer/docker-compose.yaml up -d # Ensure that the compose plugin is installed
 endif
 
 .PHONY: list
