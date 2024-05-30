@@ -18,22 +18,23 @@ export optimized
 
 all:
 
+devcontainer: action = create  # create, start, enter, stop, destroy, purge
 devcontainer:
+ifeq ($(strip $(action)), create)
 	$(MAKE) -C .devcontainer devcontainer
-
-list:
-	@LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | \
-	awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | \
-	sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'
-
-envstart:
+endif
+ifeq ($(strip $(action)), start)
 	$(MAKE) -C .devcontainer envstart
-
-enventer:
+endif
+ifeq ($(strip $(action)), enter)
 	$(MAKE) -C .devcontainer enventer
-
-envstop:
+endif
+ifeq ($(strip $(action)), stop)
 	$(MAKE) -C .devcontainer envstop
-
-envdestroy:
+endif
+ifeq ($(strip $(action)), destroy)
 	$(MAKE) -C .devcontainer envdestroy
+endif
+ifeq ($(strip $(action)), purge)
+	$(MAKE) -C .devcontainer envpurge
+endif
