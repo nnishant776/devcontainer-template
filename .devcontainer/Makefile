@@ -1,6 +1,6 @@
 all:
 
-devcontainer:
+envcreate:
 ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
 	$(MAKE) _setup_pod
@@ -20,7 +20,6 @@ _prebuild:
 	sed -i "s/container-name/$(container_name)/g" devcontainer.json
 	sed -i "s/container-name/$(container_name)/g" pod.yaml
 	sed -i "s/container-name/$(container_name)/g" docker-compose.yaml
-	cp $(project_name)/Dockerfile.template $(project_name)/Dockerfile
 
 ifeq ($(strip $(flavor)), full)
 	cp $(project_name)/Dockerfile.full.base $(project_name)/Dockerfile.base
@@ -31,10 +30,13 @@ else
 	cp $(project_name)/Dockerfile.minimal.dev $(project_name)/Dockerfile.dev
 	cp $(project_name)/Makefile.minimal $(project_name)/Makefile
 endif
+	cat $(project_name)/Dockerfile.base > $(project_name)/Dockerfile
+	sed '1d' $(project_name)/Dockerfile.dev >> $(project_name)/Dockerfile
 
 baseimage: _prebuild
-	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
-	$(runtime) build -f $(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .
+	# $(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
+	# $(runtime) build -f $(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .
+	$(runtime) build -f $(project_name)/Dockerfile -t localhost/$(project_name):dev .
 
 _setup_vscode: baseimage
 	devcontainer up --docker-path $(runtime) --workspace-folder .. # Ensure that devcontainer cli is installed (sudo npm install -g @devcontainers/cli)

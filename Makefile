@@ -21,7 +21,7 @@ all:
 devcontainer: action = create  # create, start, enter, stop, destroy, purge
 devcontainer:
 ifeq ($(strip $(action)), create)
-	$(MAKE) -C .devcontainer devcontainer
+	$(MAKE) -C .devcontainer envcreate
 endif
 ifeq ($(strip $(action)), start)
 	$(MAKE) -C .devcontainer envstart
