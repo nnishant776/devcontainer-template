@@ -16,6 +16,8 @@ export infra
 export container_name
 export optimized
 
+gendevenv:
+	$(MAKE) -C .devcontainer gendevenv
 all:
 
 devcontainer: action = create  # create, start, enter, stop, destroy, purge

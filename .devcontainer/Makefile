@@ -102,3 +102,64 @@ endif
 else
 	$(runtime) container rm vscode-$(container_name)
 endif
+
+envpurge: envdestroy
+ifeq ($(strip $(editor)), cli)
+	$(runtime) image rm localhost/$(project_name):dev
+else
+	$(runtime) container rm vscode-$(container_name)
+endif
+
+gendevenv: _prebuild
+	rm -f Makefile.dev
+	echo -e "all:" >> Makefile.dev
+	echo -e "\nenvcreate:" >> Makefile.dev
+ifeq ($(strip $(editor)), cli)
+ifeq ($(strip $(infra)), pod)
+	echo -e "\t$(runtime) build -f $(project_name)/Dockerfile -t localhost/$(project_name):dev ." >> Makefile.dev
+else
+	echo -e "\t$(runtime) compose build" >> Makefile.dev
+endif
+else
+	echo -e "\tdevcontainer build .." >> Makefile.dev
+endif
+	echo -e "\nenvstart:" >> Makefile.dev
+ifeq ($(strip $(editor)), cli)
+ifeq ($(strip $(infra)), pod)
+	echo -e "\tpodman pod start $(project_name)" >> Makefile.dev
+else
+	echo -e "\t$(runtime) compose up -d" >> Makefile.dev
+endif
+else
+	echo -e "\tdevcontainer up --docker-path $(runtime) --workspace-folder .." >> Makefile.dev
+endif
+	echo -e "\nenventer: envstart" >> Makefile.dev
+ifeq ($(strip $(editor)), cli)
+ifeq ($(strip $(infra)), pod)
+	echo -e "\tpodman exec -it -w /workspace $(project_name)-$(container_name) bash" >> Makefile.dev
+else
+	echo -e "\t$(runtime) compose exec -w /workspace development bash" >> Makefile.dev
+endif
+else
+	echo -e "\tdevcontainer open ..  # Ensure that vscode binary is discoverable in $PATH" >> Makefile.dev
+endif
+	echo -e "\nenvstop:" >> Makefile.dev
+ifeq ($(strip $(editor)), cli)
+ifeq ($(strip $(infra)), pod)
+	echo -e "\tpodman pod stop $(project_name)" >> Makefile.dev
+else
+	echo -e "\t$(runtime) compose stop" >> Makefile.dev
+endif
+else
+	echo -e "\t$(runtime) stop vscode-$(container_name)" >> Makefile.dev
+endif
+	echo -e "\nenvdestroy: envstop" >> Makefile.dev
+ifeq ($(strip $(editor)), cli)
+ifeq ($(strip $(infra)), pod)
+	echo -e "\tpodman kube play --down pod.yaml" >> Makefile.dev
+else
+	echo -e "\t$(runtime) compose down" >> Makefile.dev
+endif
+else
+	echo -e "\t$(runtime) container rm vscode-$(container_name)" >> Makefile.dev
+endif
