@@ -62,14 +62,12 @@ list:
 envstart:
 ifeq ($(strip $(editor)), cli)
 ifeq ($(strip $(infra)), pod)
-	podman pod start $(project_name) && \
-	podman exec -it -w /workspace $(project_name)-$(container_name) bash
+	podman pod start $(project_name)
 else
-	$(runtime) compose up -d && \
-	$(runtime) compose exec -w /workspace development bash
+	$(runtime) compose up -d
 endif
 else
-	devcontainer up --docker-path $(runtime) && devcontainer open
+	devcontainer up --docker-path $(runtime) --workspace-folder ..
 endif
 
 enventer: envstart
