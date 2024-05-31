@@ -6,6 +6,13 @@ ENV PS1="[\u@\h \W]# "
 
 COPY project-name/Makefile Makefile
 
+RUN apt -y install \
+    man-db \
+    manpages-dev \
+    build-essential
+
+RUN apt -y clean all
+
 RUN curl -G -L https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz -o ~/nvim-linux64.tar.gz && \
    mkdir -p ~/nvim-linux64 && \
    tar -C ~/nvim-linux64 --strip-components=1 -xf ~/nvim-linux64.tar.gz && \
