@@ -37,24 +37,7 @@ endif
 
 devcontainer: action = # create, start, enter, stop, destroy, purge
 devcontainer: gendevenv
-ifeq ($(action), create)
-	$(MAKE) -C .devcontainer envcreate
-endif
-ifeq ($(action), start)
-	$(MAKE) -C .devcontainer envstart
-endif
-ifeq ($(action), enter)
-	$(MAKE) -C .devcontainer enventer
-endif
-ifeq ($(action), stop)
-	$(MAKE) -C .devcontainer envstop
-endif
-ifeq ($(action), destroy)
-	$(MAKE) -C .devcontainer envdestroy
-endif
-ifeq ($(action), purge)
-	$(MAKE) -C .devcontainer envpurge
-endif
+	$(MAKE) -C .devcontainer env$(action)
 
 build:
 
