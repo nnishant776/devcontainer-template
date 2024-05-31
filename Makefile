@@ -25,12 +25,15 @@ all:
 
 .devcontainer/Makefile:
 	$(MAKE) -C .devcontainer -f Makefile.dev gendevenv
-	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> .git/info/exclude
-	-test -f .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
-	# sed -i '1,25d' Makefile
-	# sed -i 's/devcontainer: gendevenv/devcontainer:/g' Makefile
 
+gendevenv: type = # internal, external (setting to external (default: internal) will not add it to the VCS)
 gendevenv: .devcontainer/Makefile
+ifeq ($(strip $(type)), external)
+	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> .git/info/exclude
+	-test -d .git && sed -i "/Makefile/d" .git/info/exclude && echo "/Makefile" >> .git/info/exclude
+	-test -f .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+	-test -f .git && sed -i "/Makefile/d" .git/info/exclude && echo "/Makefil" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+endif
 
 devcontainer: action = # create, start, enter, stop, destroy, purge
 devcontainer: gendevenv
