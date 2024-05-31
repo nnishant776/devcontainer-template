@@ -20,7 +20,8 @@ all:
 .devcontainer/Makefile:
 	$(MAKE) -C .devcontainer -f Makefile.dev gendevenv
 	sed -i "/.devcontainer/d" .git/info/exclude
-	echo "/.devcontainer" >> .git/info/exclude
+	test -d .git && echo "/.devcontainer" >> .git/info/exclude
+	test -f .git && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
 	# sed -i '1,25d' Makefile
 	# sed -i 's/devcontainer: gendevenv/devcontainer:/g' Makefile
 
