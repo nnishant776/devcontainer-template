@@ -27,7 +27,11 @@ Makefile: _makegen
 	# sed -i 's/devcontainer: gendevenv/devcontainer:/g' Makefile
 
 _prebuild: _validations
-	-mv project-name $(project_name)
+	rm -rf $(project_name)
+	cp -r project-name/ $(project_name)/
+	cp devcontainer.template.json devcontainer.json
+	cp docker-compose.template.yaml docker-compose.yaml
+	cp pod.template.yaml pod.yaml
 	sed -i "s/project-name/$(project_name)/g" $(project_name)/*
 	sed -i "s/project-name/$(project_name)/g" docker-compose.yaml
 	sed -i "s/project-name/$(project_name)/g" pod.yaml
