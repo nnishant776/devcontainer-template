@@ -12,6 +12,10 @@ else
 endif
 
 _validations:
+ifeq ($(project_name), project-name)
+	echo "Invalid configuration. Please provide a valid project name"
+	exit 1
+endif
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
 ifeq ($(runtime), docker)
