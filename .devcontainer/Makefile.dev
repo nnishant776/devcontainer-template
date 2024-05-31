@@ -1,8 +1,8 @@
 all:
 
 envcreate:
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	$(MAKE) _setup_pod
 else
 	$(MAKE) _setup_compose
@@ -12,9 +12,9 @@ else
 endif
 
 _validations:
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
-ifeq ($(strip $(runtime)), docker)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
+ifeq ($(runtime), docker)
 	echo "Invalid configuration. Docker doens't support local pods"
 	exit 1
 endif
@@ -36,7 +36,7 @@ _prebuild: _validations
 	sed -i "s/container-name/$(container_name)/g" pod.yaml
 	sed -i "s/container-name/$(container_name)/g" docker-compose.yaml
 
-ifeq ($(strip $(flavor)), full)
+ifeq ($(flavor), full)
 	cp $(project_name)/Dockerfile.full.base $(project_name)/Dockerfile.base
 	cp $(project_name)/Dockerfile.full.dev $(project_name)/Dockerfile.dev
 	cp $(project_name)/Makefile.full $(project_name)/Makefile
@@ -57,7 +57,7 @@ _setup_vscode: baseimage
 	devcontainer up --docker-path $(runtime) --workspace-folder .. # Ensure that devcontainer cli is installed (sudo npm install -g @devcontainers/cli)
 
 _setup_pod: baseimage
-ifeq ($(strip $(runtime)), podman)
+ifeq ($(runtime), podman)
 	sed -i "s/$(project_name)\///g" $(project_name)/Dockerfile
 	podman kube play --replace pod.yaml # Ensure that the podman cli is installed
 else
@@ -75,8 +75,8 @@ list:
    	sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 envstart:
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	podman pod start $(project_name)
 else
 	$(runtime) compose up -d
@@ -86,8 +86,8 @@ else
 endif
 
 enventer: envstart
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	podman exec -it -w /workspace $(project_name)-$(container_name) bash
 else
 	$(runtime) compose exec -w /workspace development bash
@@ -97,8 +97,8 @@ else
 endif
 
 envstop:
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	podman pod stop $(project_name)
 else
 	$(runtime) compose stop
@@ -108,8 +108,8 @@ else
 endif
 
 envdestroy: envstop
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	podman kube play --down pod.yaml
 else
 	$(runtime) compose down
@@ -119,7 +119,7 @@ else
 endif
 
 envpurge: envdestroy
-ifeq ($(strip $(editor)), cli)
+ifeq ($(editor), cli)
 	$(runtime) image rm localhost/$(project_name):dev
 else
 	# $(runtime) container rm vscode-$(container_name)
@@ -129,8 +129,8 @@ _makegen: _prebuild
 	rm -f Makefile
 	echo -e "all:" >> Makefile
 	echo -e "\nenvcreate:" >> Makefile
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	echo -e "\tpodman kube play --replace pod.yaml" >> Makefile
 else
 	echo -e "\t$(runtime) compose build" >> Makefile
@@ -139,8 +139,8 @@ else
 	echo -e "\tdevcontainer build .." >> Makefile
 endif
 	echo -e "\nenvstart:" >> Makefile
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	echo -e "\tpodman pod start $(project_name)" >> Makefile
 else
 	echo -e "\t$(runtime) compose up -d" >> Makefile
@@ -149,8 +149,8 @@ else
 	echo -e "\tdevcontainer up --docker-path $(runtime) --workspace-folder .." >> Makefile
 endif
 	echo -e "\nenventer: envstart" >> Makefile
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	echo -e "\tpodman exec -it -w /workspace $(project_name)-$(container_name) bash" >> Makefile
 else
 	echo -e "\t$(runtime) compose exec -w /workspace development bash" >> Makefile
@@ -159,8 +159,8 @@ else
 	echo -e "\tdevcontainer open ..  # Ensure that vscode binary is discoverable in $PATH" >> Makefile
 endif
 	echo -e "\nenvstop:" >> Makefile
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	echo -e "\tpodman pod stop $(project_name)" >> Makefile
 else
 	echo -e "\t$(runtime) compose stop" >> Makefile
@@ -169,8 +169,8 @@ else
 	echo -e "\t$(runtime) stop vscode-$(container_name)" >> Makefile
 endif
 	echo -e "\nenvdestroy: envstop" >> Makefile
-ifeq ($(strip $(editor)), cli)
-ifeq ($(strip $(infra)), pod)
+ifeq ($(editor), cli)
+ifeq ($(infra), pod)
 	echo -e "\tpodman kube play --down pod.yaml" >> Makefile
 else
 	echo -e "\t$(runtime) compose down" >> Makefile
@@ -179,7 +179,7 @@ else
 	echo -e "\t$(runtime) container rm vscode-$(container_name)" >> Makefile
 endif
 	echo -e "\nenvpurge: envdestroy" >> Makefile
-ifeq ($(strip $(editor)), cli)
+ifeq ($(editor), cli)
 	echo -e "\t$(runtime) image rm localhost/$(project_name):dev"
 else
 	# $(runtime) container rm vscode-$(container_name)

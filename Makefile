@@ -1,10 +1,16 @@
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-project_name = project-name
-flavor = full # full, minimal
-runtime = podman # podman, docker
-editor = cli # cli, vscode
-infra = pod # pod, compose (pod is only supported with podman)
+_project_name = project-name
+_flavor = full # full, minimal
+_runtime = podman # podman, docker
+_editor = cli # cli, vscode
+_infra = pod # pod, compose (pod is only supported with podman)
+
+project_name = $(strip $(_project_name))
+flavor = $(strip $(_flavor))
+runtime = $(strip $(_runtime))
+editor = $(strip $(_editor))
+infra = $(strip $(_infra))
 container_name = ${project_name}-dev
 
 export project_name
@@ -29,22 +35,22 @@ gendevenv: .devcontainer/Makefile
 
 devcontainer: action = create  # create, start, enter, stop, destroy, purge
 devcontainer: gendevenv
-ifeq ($(strip $(action)), create)
+ifeq ($(action), create)
 	$(MAKE) -C .devcontainer envcreate
 endif
-ifeq ($(strip $(action)), start)
+ifeq ($(action), start)
 	$(MAKE) -C .devcontainer envstart
 endif
-ifeq ($(strip $(action)), enter)
+ifeq ($(action), enter)
 	$(MAKE) -C .devcontainer enventer
 endif
-ifeq ($(strip $(action)), stop)
+ifeq ($(action), stop)
 	$(MAKE) -C .devcontainer envstop
 endif
-ifeq ($(strip $(action)), destroy)
+ifeq ($(action), destroy)
 	$(MAKE) -C .devcontainer envdestroy
 endif
-ifeq ($(strip $(action)), purge)
+ifeq ($(action), purge)
 	$(MAKE) -C .devcontainer envpurge
 endif
 
