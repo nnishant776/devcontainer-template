@@ -21,6 +21,7 @@ spec:
     command: [ "/lib/systemd/systemd" ] # Optional. Remove if you don't want systemd
     tty: true
     stdin: true
+    workingDir: /workspace
     volumeMounts:
     - name: localtime
       mountPath: /etc/localtime
