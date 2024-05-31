@@ -33,7 +33,7 @@ all:
 
 gendevenv: .devcontainer/Makefile
 
-devcontainer: action = create  # create, start, enter, stop, destroy, purge
+devcontainer: action = # create, start, enter, stop, destroy, purge
 devcontainer: gendevenv
 ifeq ($(action), create)
 	$(MAKE) -C .devcontainer envcreate
