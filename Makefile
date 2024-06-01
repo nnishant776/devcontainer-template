@@ -14,6 +14,7 @@ editor = $(strip $(_editor))
 infra = $(strip $(_infra))
 optimized = $(strip $(_optimized))
 container_name = ${project_name}-dev
+vcs = false # true, false (setting to true will add new/modified devcontainer files to the working tree)
 
 export project_name
 export flavor
@@ -22,6 +23,7 @@ export editor
 export infra
 export container_name
 export optimized
+export vcs
 
 all:
 
@@ -29,14 +31,17 @@ all:
 	$(MAKE) -C .devcontainer -f Makefile.dev gendevenv
 
 # action: create, start, enter, stop, destroy, purge, clean
-# vcs: true, false (setting to true (default: false) will add it to the VCS working tree)
-devcontainer: action =, vcs = 
+devcontainer: action =
 devcontainer: .devcontainer/Makefile
+	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude
+	-test -d .git && sed -i "/Makefile/d" .git/info/exclude
+	-test -f .git && sed -i "/.devcontainer/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+	-test -f .git && sed -i "/Makefile/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
 ifeq ($(strip $(vcs)), false)
-	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> .git/info/exclude
-	-test -d .git && sed -i "/Makefile/d" .git/info/exclude && echo "/Makefile" >> .git/info/exclude
-	-test -f .git && sed -i "/.devcontainer/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
-	-test -f .git && sed -i "/Makefile/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/Makefile" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+	-test -d .git && echo "/.devcontainer" >> .git/info/exclude
+	-test -d .git && echo "/Makefile" >> .git/info/exclude
+	-test -f .git && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+	-test -f .git && echo "/Makefile" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
 endif
 ifeq ($(optimized), true)
 	touch .devcontainer/.optimized
