@@ -31,8 +31,8 @@ gendevenv: .devcontainer/Makefile
 ifeq ($(strip $(type)), external)
 	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> .git/info/exclude
 	-test -d .git && sed -i "/Makefile/d" .git/info/exclude && echo "/Makefile" >> .git/info/exclude
-	-test -f .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
-	-test -f .git && sed -i "/Makefile/d" .git/info/exclude && echo "/Makefil" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+	-test -f .git && sed -i "/.devcontainer/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+	-test -f .git && sed -i "/Makefile/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/Makefile" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
 endif
 
 devcontainer: action = # create, start, enter, stop, destroy, purge
