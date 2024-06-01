@@ -12,6 +12,8 @@ RUN apt -y install --no-install-recommends \
     tar \
     gzip \
     make \
-    file
+    file \
+    man-db \
+    manpages-dev \
 
 RUN apt -y clean all
