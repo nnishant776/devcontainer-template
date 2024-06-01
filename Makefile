@@ -28,20 +28,22 @@ all:
 .devcontainer/Makefile:
 	$(MAKE) -C .devcontainer -f Makefile.dev gendevenv
 
-gendevenv: type = # internal, external (setting to external (default: internal) will not add it to the VCS)
-gendevenv: .devcontainer/Makefile
+devcontainer: action = # create, start, enter, stop, destroy, purge, clean
+devcontainer: type = external # internal, external (setting to internal (default: external) will add it to the VCS working tree)
+devcontainer: .devcontainer/Makefile
 ifeq ($(strip $(type)), external)
 	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> .git/info/exclude
 	-test -d .git && sed -i "/Makefile/d" .git/info/exclude && echo "/Makefile" >> .git/info/exclude
 	-test -f .git && sed -i "/.devcontainer/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
 	-test -f .git && sed -i "/Makefile/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/Makefile" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
 endif
-
-devcontainer: action = # create, start, enter, stop, destroy, purge, clean
-devcontainer: gendevenv
 ifeq ($(optimized), true)
 	touch .devcontainer/.optimized
 	$(MAKE) -C .devcontainer -f Makefile.dev baseimage
+endif
+ifeq ($(strip $(action)),)
+	echo "Invalid/empty action '$(action)'. Please specify one out of create, start, enter, stop, destroy, purge, clean"
+	exit 1
 endif
 	$(MAKE) -C .devcontainer env$(action)
 
