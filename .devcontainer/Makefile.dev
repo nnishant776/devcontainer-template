@@ -57,9 +57,24 @@ endif
 	sed '1d' $(project_name)/Dockerfile.dev >> $(project_name)/Dockerfile
 
 baseimage: _prebuild
-	# $(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
-	# $(runtime) build -f $(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .
+ifeq ($(flavor), full)
+ifeq ($(optimized), true)
+	$(runtime) inspect localhost/project-name:full 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:full localhost/$(project_name):base || \
+	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
+	$(runtime) inspect localhost/project-name:full 2>&1 > /dev/null || \
+	$(runtime) tag localhost/$(project_name):base localhost/project-name:full
+else
+	$(runtime) inspect localhost/project-name:minimal 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:minimal localhost/$(project_name):base || \
+	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
+	$(runtime) inspect localhost/project-name:minimal 2>&1 > /dev/null || \
+	$(runtime) tag localhost/$(project_name):base localhost/project-name:minimal
+endif
+	$(runtime) build -f $(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .
+else
 	$(runtime) build -f $(project_name)/Dockerfile -t localhost/$(project_name):dev .
+endif
 
 _setup_vscode: baseimage
 	devcontainer up --docker-path $(runtime) --workspace-folder .. # Ensure that devcontainer cli is installed (sudo npm install -g @devcontainers/cli)
