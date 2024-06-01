@@ -28,10 +28,11 @@ all:
 .devcontainer/Makefile:
 	$(MAKE) -C .devcontainer -f Makefile.dev gendevenv
 
-devcontainer: action = # create, start, enter, stop, destroy, purge, clean
-devcontainer: type = external # internal, external (setting to internal (default: external) will add it to the VCS working tree)
+# action: create, start, enter, stop, destroy, purge, clean
+# vcs: true, false (setting to true (default: false) will add it to the VCS working tree)
+devcontainer: action =, vcs = 
 devcontainer: .devcontainer/Makefile
-ifeq ($(strip $(type)), external)
+ifeq ($(strip $(vcs)), false)
 	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude && echo "/.devcontainer" >> .git/info/exclude
 	-test -d .git && sed -i "/Makefile/d" .git/info/exclude && echo "/Makefile" >> .git/info/exclude
 	-test -f .git && sed -i "/.devcontainer/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
