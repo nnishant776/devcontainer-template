@@ -31,12 +31,30 @@ Makefile: _makegen
 	# sed -i 's/devcontainer: gendevenv/devcontainer:/g' Makefile
 
 _prebuild: _validations
+ifeq ($(flavor), full)
+	cp project-name/Dockerfile.full.base project-name/Dockerfile.base
+	cp project-name/Dockerfile.full.dev project-name/Dockerfile.dev
+	cp project-name/Makefile.full project-name/Makefile
+else
+	cp project-name/Dockerfile.minimal.base project-name/Dockerfile.base
+	cp project-name/Dockerfile.minimal.dev project-name/Dockerfile.dev
+	cp project-name/Makefile.minimal project-name/Makefile
+endif
+	rm -rf project-name/project-name
+	mkdir -p project-name/project-name
+	cp project-name/Makefile project-name/project-name/
+
 	rm -rf $(project_name)
 	cp -r project-name/ $(project_name)/
+	mkdir -p $(project_name)/$(project_name)
+	cp $(project_name)/Makefile $(project_name)/$(project_name)/
+
 	cp devcontainer.template.json devcontainer.json
 	cp docker-compose.template.yaml docker-compose.yaml
 	cp pod.template.yaml pod.yaml
-	sed -i "s/project-name/$(project_name)/g" $(project_name)/*
+
+	$(shell find $(project_name) -type f -exec sed -i "s/project-name/$(project_name)/g" {} \;)
+
 	sed -i "s/project-name/$(project_name)/g" docker-compose.yaml
 	sed -i "s/project-name/$(project_name)/g" pod.yaml
 	sed -i "s/project-name/$(project_name)/g" devcontainer.json
@@ -44,34 +62,26 @@ _prebuild: _validations
 	sed -i "s/container-name/$(container_name)/g" pod.yaml
 	sed -i "s/container-name/$(container_name)/g" docker-compose.yaml
 
-ifeq ($(flavor), full)
-	cp $(project_name)/Dockerfile.full.base $(project_name)/Dockerfile.base
-	cp $(project_name)/Dockerfile.full.dev $(project_name)/Dockerfile.dev
-	cp $(project_name)/Makefile.full $(project_name)/Makefile
-else
-	cp $(project_name)/Dockerfile.minimal.base $(project_name)/Dockerfile.base
-	cp $(project_name)/Dockerfile.minimal.dev $(project_name)/Dockerfile.dev
-	cp $(project_name)/Makefile.minimal $(project_name)/Makefile
-endif
 	cat $(project_name)/Dockerfile.base > $(project_name)/Dockerfile
 	sed '1d' $(project_name)/Dockerfile.dev >> $(project_name)/Dockerfile
 
 baseimage: _prebuild
-ifeq ($(flavor), full)
 ifeq ($(optimized), true)
-	$(runtime) inspect localhost/project-name:full 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:full localhost/$(project_name):base || \
-	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
-	$(runtime) inspect localhost/project-name:full 2>&1 > /dev/null || \
-	$(runtime) tag localhost/$(project_name):base localhost/project-name:full
+ifeq ($(flavor), full)
+	$(runtime) inspect localhost/project-name:full-base 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:full-base localhost/$(project_name):base || \
+	$(runtime) build -f project-name/Dockerfile.full.base -t localhost/project-name:full-base .
+	$(runtime) build -f project-name/Dockerfile.full.dev -t localhost/project-name:full-dev .
 else
-	$(runtime) inspect localhost/project-name:minimal 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:minimal localhost/$(project_name):base || \
-	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
-	$(runtime) inspect localhost/project-name:minimal 2>&1 > /dev/null || \
-	$(runtime) tag localhost/$(project_name):base localhost/project-name:minimal
+	$(runtime) inspect localhost/project-name:minimal-base 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:minimal-base localhost/$(project_name):base || \
+	$(runtime) build -f project-name/Dockerfile.minimal.base -t localhost/project-name:minimal-base .
+	$(runtime) build -f project-name/Dockerfile.minimal.dev -t localhost/project-name:minimal-dev .
 endif
+	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
 	$(runtime) build -f $(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .
+	rm -rf project-name/project-name
+	rm -rf $(project_name)/$(project_name)
 else
 	$(runtime) build -f $(project_name)/Dockerfile -t localhost/$(project_name):dev .
 endif
@@ -82,9 +92,14 @@ _setup_vscode: baseimage
 _setup_pod: baseimage
 ifeq ($(runtime), podman)
 	sed -i "s/$(project_name)\///g" $(project_name)/Dockerfile
+	rm -rf project-name/project-name
+	rm -rf $(project_name)/$(project_name)
+	mkdir -p project-name/project-name
+	cp $(project_name)/Makefile project-name/project-name/
 	mkdir -p $(project_name)/$(project_name)
 	cp $(project_name)/Makefile $(project_name)/$(project_name)/
 	podman kube play --replace pod.yaml # Ensure that the podman cli is installed
+	rm -rf project-name/project-name
 	rm -rf $(project_name)/$(project_name)
 else
 	echo "Invalid runtime and infra combination"
@@ -151,6 +166,17 @@ else
 	# $(runtime) container rm vscode-$(container_name)
 endif
 
+envcleangen:
+	rm -f project-name/Dockerfile.base
+	rm -f project-name/Dockerfile.dev
+	rm -f project-name/Makefile
+	rm -rf project-name/project-name
+	rm -rf $(project_name)
+	rm -f devcontainer.json
+	rm -f docker-compose.yaml
+	rm -f pod.yaml
+	rm -f Makefile
+
 _makegen: _prebuild
 	rm -f Makefile
 	echo -e "all:" >> Makefile
@@ -213,5 +239,15 @@ ifeq ($(editor), cli)
 else
 	# $(runtime) container rm vscode-$(container_name)
 endif
+	echo -e "\nenvcleangen:" >> Makefile
+	echo -e "\trm -f project-name/Dockerfile.base" >> Makefile
+	echo -e "\trm -f project-name/Dockerfile.dev" >> Makefile
+	echo -e "\trm -f project-name/Makefile" >> Makefile
+	echo -e "\trm -rf project-name/project-name" >> Makefile
+	echo -e "\trm -rf $(project_name)" >> Makefile
+	echo -e "\trm -f devcontainer.json" >> Makefile
+	echo -e "\trm -f docker-compose.yaml" >> Makefile
+	echo -e "\trm -f pod.yaml" >> Makefile
+	echo -e "\trm -f Makefile" >> Makefile
 
 gendevenv: Makefile

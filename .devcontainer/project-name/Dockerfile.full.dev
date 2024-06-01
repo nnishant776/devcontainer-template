@@ -1,4 +1,4 @@
-FROM localhost/project-name:base
+FROM localhost/project-name:full-base
 
 WORKDIR /root
 

@@ -37,7 +37,7 @@ ifeq ($(strip $(type)), external)
 	-test -f .git && sed -i "/Makefile/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude && echo "/Makefile" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
 endif
 
-devcontainer: action = # create, start, enter, stop, destroy, purge
+devcontainer: action = # create, start, enter, stop, destroy, purge, cleangen
 devcontainer: gendevenv
 ifeq ($(optimized), true)
 	touch .devcontainer/.optimized
