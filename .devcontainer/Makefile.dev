@@ -166,7 +166,7 @@ else
 	# $(runtime) container rm vscode-$(container_name)
 endif
 
-envcleangen:
+envclean:
 	rm -f project-name/Dockerfile.base
 	rm -f project-name/Dockerfile.dev
 	rm -f project-name/Makefile
@@ -239,7 +239,7 @@ ifeq ($(editor), cli)
 else
 	# $(runtime) container rm vscode-$(container_name)
 endif
-	echo -e "\nenvcleangen:" >> Makefile
+	echo -e "\nenvclean:" >> Makefile
 	echo -e "\trm -f project-name/Dockerfile.base" >> Makefile
 	echo -e "\trm -f project-name/Dockerfile.dev" >> Makefile
 	echo -e "\trm -f project-name/Makefile" >> Makefile
