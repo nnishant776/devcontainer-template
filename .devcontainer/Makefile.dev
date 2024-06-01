@@ -67,7 +67,10 @@ _setup_vscode: baseimage
 _setup_pod: baseimage
 ifeq ($(runtime), podman)
 	sed -i "s/$(project_name)\///g" $(project_name)/Dockerfile
+	mkdir -p $(project_name)/$(project_name)
+	cp $(project_name)/Makefile $(project_name)/$(project_name)/
 	podman kube play --replace pod.yaml # Ensure that the podman cli is installed
+	rm -rf $(project_name)/$(project_name)
 else
 	echo "Invalid runtime and infra combination"
 	exit 1
@@ -139,7 +142,10 @@ _makegen: _prebuild
 	echo -e "\nenvcreate:" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
+	echo -e "\tmkdir -p $(project_name)/$(project_name)" >> Makefile
+	echo -e "\tcp $(project_name)/Makefile $(project_name)/$(project_name)/" >> Makefile
 	echo -e "\tpodman kube play --replace pod.yaml" >> Makefile
+	echo -e "\trm -rf $(project_name)/$(project_name)" >> Makefile
 else
 	echo -e "\t$(runtime) compose build" >> Makefile
 endif
