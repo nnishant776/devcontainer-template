@@ -15,9 +15,17 @@ endif
 endif
 
 Makefile: _makegen
-	# sed -i "s/project-name/$(project_name)/g" .gitignore
-	# sed -i '1,25d' Makefile
-	# sed -i 's/devcontainer: gendevenv/devcontainer:/g' Makefile
+	-test -d ../.git && sed -i "/.devcontainer/d" ../.git/info/exclude
+	-test -d ../.git && sed -i "/Makefile/d" ../.git/info/exclude
+	-test -f ../.git && sed -i "/.devcontainer/d" $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+	-test -f ../.git && sed -i "/Makefile/d" $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+ifeq ($(strip $(vcs)), false)
+	-test -d ../.git && echo "/.devcontainer" >> ../.git/info/exclude
+	-test -d ../.git && echo "/Makefile" >> ../.git/info/exclude
+	-test -f ../.git && echo "/.devcontainer" >> $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+	-test -f ../.git && echo "/Makefile" >> $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+endif
+
 
 _prebuild: _validations
 ifeq ($(flavor), full)

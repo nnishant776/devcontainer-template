@@ -27,31 +27,25 @@ export vcs
 
 all:
 
-.devcontainer/Makefile:
-	$(MAKE) -C .devcontainer -f Makefile.dev gendevenv
-
-# action: create, start, enter, stop, destroy, purge, clean
+# action: generate, create, start, enter, stop, destroy, purge, clean
 devcontainer: action =
-devcontainer: .devcontainer/Makefile
-	-test -d .git && sed -i "/.devcontainer/d" .git/info/exclude
-	-test -d .git && sed -i "/Makefile/d" .git/info/exclude
-	-test -f .git && sed -i "/.devcontainer/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
-	-test -f .git && sed -i "/Makefile/d" $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
-ifeq ($(strip $(vcs)), false)
-	-test -d .git && echo "/.devcontainer" >> .git/info/exclude
-	-test -d .git && echo "/Makefile" >> .git/info/exclude
-	-test -f .git && echo "/.devcontainer" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
-	-test -f .git && echo "/Makefile" >> $(shell cat .git | cut -d ':' -f 2)/../../info/exclude
+devcontainer:
+ifeq ($(strip $(action)),)
+	echo "Invalid/empty action '$(action)'. Please specify one out of create, start, enter, stop, destroy, purge, clean"
+	exit 1
+else
+ifeq ($(strip $(action)), generate)
+	$(MAKE) -C .devcontainer -f Makefile.dev Makefile
+	exit 0
+endif
 endif
 ifeq ($(optimized), true)
 	touch .devcontainer/.optimized
 	$(MAKE) -C .devcontainer -f Makefile.dev baseimage
 endif
-ifeq ($(strip $(action)),)
-	echo "Invalid/empty action '$(action)'. Please specify one out of create, start, enter, stop, destroy, purge, clean"
-	exit 1
-endif
+ifneq ($(strip $(action)), generate)
 	$(MAKE) -C .devcontainer env$(action)
+endif
 
 build:
 
