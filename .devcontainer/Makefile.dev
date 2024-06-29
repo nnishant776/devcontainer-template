@@ -52,7 +52,7 @@ endif
 	cp docker-compose.template.yaml docker-compose.yaml
 	cp pod.template.yaml pod.yaml
 
-	$(shell find $(project_name) -type f -exec sed -i "s/project-name/$(project_name)/g" {} \;)
+	find $(project_name) -type f -exec sed -i "s/project-name/$(project_name)/g" {} \;
 
 	sed -i "s/project-name/$(project_name)/g" docker-compose.yaml
 	sed -i "s/project-name/$(project_name)/g" pod.yaml
