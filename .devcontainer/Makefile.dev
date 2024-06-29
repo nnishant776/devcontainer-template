@@ -28,15 +28,6 @@ endif
 
 
 _prebuild: _validations
-ifeq ($(flavor), full)
-	cp project-name/Dockerfile.full.base project-name/Dockerfile.base
-	cp project-name/Dockerfile.full.dev project-name/Dockerfile.dev
-	cp project-name/Makefile.full project-name/Makefile
-else
-	cp project-name/Dockerfile.minimal.base project-name/Dockerfile.base
-	cp project-name/Dockerfile.minimal.dev project-name/Dockerfile.dev
-	cp project-name/Makefile.minimal project-name/Makefile
-endif
 	rm -rf project-name/project-name
 	rm -rf $(project_name)
 
@@ -66,17 +57,10 @@ endif
 
 baseimage: _prebuild
 ifeq ($(optimized), true)
-ifeq ($(flavor), full)
-	$(runtime) inspect localhost/project-name:full-base 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:full-base localhost/$(project_name):base || \
-	$(runtime) build -f project-name/Dockerfile.full.base -t localhost/project-name:full-base .
-	$(runtime) build -f project-name/Dockerfile.full.dev -t localhost/project-name:full-dev .
-else
-	$(runtime) inspect localhost/project-name:minimal-base 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:minimal-base localhost/$(project_name):base || \
-	$(runtime) build -f project-name/Dockerfile.minimal.base -t localhost/project-name:minimal-base .
-	$(runtime) build -f project-name/Dockerfile.minimal.dev -t localhost/project-name:minimal-dev .
-endif
+	$(runtime) inspect localhost/project-name:base 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:base localhost/$(project_name):base || \
+	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base .
+	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev .
 	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
 	$(runtime) build -f $(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .
 else
