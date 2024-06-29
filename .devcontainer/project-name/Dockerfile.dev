@@ -1,4 +1,4 @@
-FROM localhost/project-name:minimal-base
+FROM localhost/project-name:base
 
 WORKDIR /root
 
@@ -31,5 +31,20 @@ RUN cd ~ && \
 RUN cd ~ && \
    rm -rf ~/.config/nvim && \
    git clone --recursive --depth=1 -b dev https://github.com/nnishant776/init.lua ~/.config/nvim
+
+RUN mkdir -p -m 755 /etc/apt/keyrings && \
+   curl -G -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null && \
+   chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg  && \
+   echo "deb [arch=$(arch) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+   apt update && \
+   apt install gh -y
+
+RUN go install "github.com/cweill/gotests/gotests@latest" && \
+	go install "github.com/fatih/gomodifytags@latest" && \
+	go install "github.com/josharian/impl@latest" && \
+	go install "honnef.co/go/tools/cmd/staticcheck@latest" && \
+	go install "golang.org/x/tools/gopls@latest" && \
+	go install "github.com/segmentio/golines@latest" && \
+	go install "golang.org/x/tools/cmd/goimports@latest"
 
 RUN env features=ide nvim --headless "+Lazy restore" "+TSUpdateSync" "+qa"

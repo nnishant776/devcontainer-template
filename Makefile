@@ -1,14 +1,12 @@
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
 _project_name = project-name
-_flavor = full # full, minimal
 _runtime = podman # podman, docker
 _editor = cli # cli, vscode
 _infra = pod # pod, compose (pod is only supported with podman)
 _optimized = false # true or false (use if for multi stage builds)
 
 project_name = $(strip $(_project_name))
-flavor = $(strip $(_flavor))
 runtime = $(strip $(_runtime))
 editor = $(strip $(_editor))
 infra = $(strip $(_infra))
@@ -17,7 +15,6 @@ container_name = ${project_name}-dev
 vcs = false # true, false (setting to true will add new/modified devcontainer files to the working tree)
 
 export project_name
-export flavor
 export runtime
 export editor
 export infra
