@@ -33,7 +33,7 @@ This is Makefile based workflow. So, to configure this for a particular reposito
 
 Do note that since this is `Makefile` based, the configurations mentioned below could also be passed at the time of invocation of the `make` command, but the optimal way would be to edit the defaults here in case you want to share the configuration for a given project. This would help with consistent, reproducible builds for the devcontainer.
 
-### Change the default project name to generate the devcontainer configuration
+### Change the default project name
 In the root `Makefile` file, make the changes at the indicated position
 ```make
 # Either edit below variables to their desired value or provide these in the command line
@@ -43,6 +43,8 @@ _runtime = podman # podman, docker
 _editor = cli # cli, vscode
 ...
 ```
+
+### Change the default container runtime
 Once the project name is updated, the next step is to update the container runtime you want to work with. The default is set to `podman` here but docker is also supported. So, you can change this to `docker` as well.
 ```make
 # Either edit below variables to their desired value or provide these in the command line
@@ -53,6 +55,8 @@ _editor = cli # cli, vscode
 _infra = pod # pod, compose (pod is only supported with podman)
 _optimized = false # true or false (use if for multi stage builds)
 ```
+
+### Change the mode of editing
 After runtime configuration, you also have the option to choose your mode of code editing. The options available are `cli` (terminal based) and `vscode` (GUI based). Selecting either will configure and create the devcontainers and the associated configuration depending on the respective choice.
 
 **NOTE**:
@@ -68,6 +72,7 @@ _infra = pod # pod, compose (pod is only supported with podman)
 _optimized = false # true or false (use if for multi stage builds)
 ```
 
+### Change the default container manager
 After the editor choice selection, we need to decide how the created containers will be managed. The available options to do so are through either `pod` or `compose`. As the name implies, `compose` would manage containers through a `docker-compose.yaml` file, whereas `pod` would manage the containers via a Kubernetes pod specification.
 ```make
 # Either edit below variables to their desired value or provide these in the command line
@@ -83,6 +88,7 @@ Given that `docker` is the most prevalant choice for most user, container osches
 **NOTE**:
 > Currrently, choosing `pod` for container management requires that you choose the runtime as `podman` as the `docke` runtime doesn't support launching containers through pod specification.
 
+### Enable build optimization
 If you plan to use this template for multiple projects on the same machine, changing the `_optimized` setting to `true` would be helpful with the container build times. This option allows the runtimes to do multi-stage builds as it creates separate layered base and development images. As long as the steps are not modified, the existing base and dev images should drastically reduce the time to bring up new devcontainers in different projects
 ```make
 # Either edit below variables to their desired value or provide these in the command line
@@ -92,6 +98,20 @@ _runtime = podman # podman, docker
 _editor = cli # cli, vscode
 _infra = pod # pod, compose (pod is only supported with podman)
 _optimized = false # true or false (use if for multi stage builds) <---- Change this to true to help with caching
+```
+### Check the generated files into VCS
+You can select to add the generated files and the modified configuration to be tracked in vcs by default. To enable this, set the `vcs` option to `true`. This is off by default, i.e., the generated configuration will not be tracked by vcs
+```make
+_infra = compose # pod, compose (pod is only supported with podman)
+_optimized = false # true or false (use if for multi stage builds)
+
+project_name = $(strip $(_project_name))
+runtime = $(strip $(_runtime))
+editor = $(strip $(_editor))
+infra = $(strip $(_infra))
+optimized = $(strip $(_optimized))
+container_name = ${project_name}-dev
+vcs = false # true, false (setting to true will add new/modified devcontainer files to the working tree)  <----
 ```
 
 ## Devcontainer operations
