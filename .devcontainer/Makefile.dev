@@ -75,75 +75,72 @@ list:
 
 _makegen: _prebuild
 	rm -f Makefile
-	echo -e "all:" >> Makefile
-	echo -e "\nenvcreate:" >> Makefile
+	printf "all:\n" >> Makefile
+	printf "\nenvcreate:\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	echo -e "\tpodman kube play --replace pod.yaml" >> Makefile
+	printf "\tpodman kube play --replace pod.yaml --network=host\n" >> Makefile
 else
-	echo -e "\t$(runtime) compose build" >> Makefile
+	printf "\t$(runtime) compose build\n" >> Makefile
 endif
 else
 	# Ensure that devcontainer cli is installed (sudo npm install -g @devcontainers/cli)
-	echo -e "\tdevcontainer build .." >> Makefile
+	printf "\tdevcontainer build ..\n" >> Makefile
 endif
-	echo -e "\nenvstart:" >> Makefile
+	printf "\nenvstart:\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	echo -e "\tpodman pod start $(project_name)" >> Makefile
+	printf "\tpodman pod start $(project_name)\n" >> Makefile
 else
-	echo -e "\t$(runtime) compose up -d" >> Makefile
+	printf "\t$(runtime) compose up -d\n" >> Makefile
 endif
 else
-	echo -e "\tdevcontainer up --docker-path $(runtime) --workspace-folder .." >> Makefile
+	printf "\tdevcontainer up --docker-path $(runtime) --workspace-folder ..\n" >> Makefile
 endif
-	echo -e "\nenventer: envstart" >> Makefile
+	printf "\nenventer: envstart\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	echo -e "\tpodman exec -it $(project_name)-$(container_name) bash" >> Makefile
+	printf "\tpodman exec -it $(project_name)-$(container_name) bash\n" >> Makefile
 else
-	echo -e "\t$(runtime) compose exec development bash" >> Makefile
+	printf "\t$(runtime) compose exec development bash\n" >> Makefile
 endif
 else
 	# Ensure that vscode binary is discoverable in $PATH
-	echo -e "\tdevcontainer open .." >> Makefile
+	printf "\tdevcontainer open ..\n" >> Makefile
 endif
-	echo -e "\nenvstop:" >> Makefile
+	printf "\nenvstop:\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	echo -e "\tpodman pod stop $(project_name)" >> Makefile
+	printf "\tpodman pod stop $(project_name)\n" >> Makefile
 else
-	echo -e "\t$(runtime) compose stop" >> Makefile
+	printf "\t$(runtime) compose stop\n" >> Makefile
 endif
 else
-	echo -e "\t$(runtime) stop vscode-$(container_name)" >> Makefile
+	printf "\t$(runtime) stop vscode-$(container_name)\n" >> Makefile
 endif
-	echo -e "\nenvdestroy: envstop" >> Makefile
+	printf "\nenvdestroy: envstop\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	echo -e "\tpodman kube play --down pod.yaml" >> Makefile
+	printf "\tpodman kube play --down pod.yaml\n" >> Makefile
 else
-	echo -e "\t$(runtime) compose down" >> Makefile
+	printf "\t$(runtime) compose down\n" >> Makefile
 endif
 else
-	echo -e "\t$(runtime) container rm vscode-$(container_name)" >> Makefile
+	printf "\t$(runtime) container rm vscode-$(container_name)\n" >> Makefile
 endif
-	echo -e "\nenvpurge: envdestroy" >> Makefile
+	printf "\nenvpurge: envdestroy\n" >> Makefile
 ifeq ($(editor), cli)
-	echo -e "\t$(runtime) image rm localhost/$(project_name):dev"
+	printf "\t$(runtime) image rm localhost/$(project_name):dev\n"
 else
 	# $(runtime) container rm vscode-$(container_name)
 endif
-	echo -e "\nenvclean:" >> Makefile
-	echo -e "\trm -f project-name/Dockerfile.base" >> Makefile
-	echo -e "\trm -f project-name/Dockerfile.dev" >> Makefile
-	echo -e "\trm -f project-name/Makefile" >> Makefile
-	echo -e "\trm -rf project-name/project-name" >> Makefile
-	echo -e "\trm -rf $(project_name)" >> Makefile
-	echo -e "\trm -f devcontainer.json" >> Makefile
-	echo -e "\trm -f docker-compose.yaml" >> Makefile
-	echo -e "\trm -f pod.yaml" >> Makefile
-	echo -e "\trm -f Makefile" >> Makefile
-	echo -e "\trm -f .optimized" >> Makefile
+	printf "\nenvclean:\n" >> Makefile
+	printf "\trm -rf $(project_name)\n" >> Makefile
+	printf "\trm -rf project-name/project-name\n" >> Makefile
+	printf "\trm -f devcontainer.json\n" >> Makefile
+	printf "\trm -f docker-compose.yaml\n" >> Makefile
+	printf "\trm -f pod.yaml\n" >> Makefile
+	printf "\trm -f Makefile\n" >> Makefile
+	printf "\trm -f .optimized\n" >> Makefile
 
 gendevenv: Makefile
