@@ -14,6 +14,13 @@ endif
 endif
 endif
 
+ifeq ($(editor), vscode)
+ifeq ($(infra), pod)
+	echo "Invalid configuration. VSCode devcontainer configuration doens't support local pods"
+	exit 1
+endif
+endif
+
 Makefile: _makegen
 	-test -d ../.git && sed -i "/.devcontainer/d" ../.git/info/exclude
 	-test -d ../.git && sed -i "/Makefile/d" ../.git/info/exclude
@@ -42,6 +49,14 @@ _prebuild: _validations
 	cp devcontainer.template.json devcontainer.json
 	cp docker-compose.template.yaml docker-compose.yaml
 	cp pod.template.yaml pod.yaml
+
+ifeq ($(editor), vscode)
+ifeq ($(infra), compose)
+	cp devcontainer-compose.template.json devcontainer.json
+	sed -i "s/container-name/vscode-container-name/g" devcontainer.json
+	sed -i "/command:/d" docker-compose.yaml
+endif
+endif
 
 	find $(project_name) -type f -exec sed -i "s/project-name/$(project_name)/g" {} \;
 
