@@ -3,22 +3,22 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "project-name"
+  name: project-name
   namespace: project-name-dev
   labels:
-    app: "project-name"
+    app: project-name
 spec:
   containers:
   - name: container-name
-    image: "localhost/project-name:dev"
+    image: localhost/project-name:dev
     securityContext:
       privileged: true
       capbilities:
-        add: [ "SYS_PTRACE" ] # Add more capabilities based on the requirements
+        add: [SYS_PTRACE]       # Add more capabilities based on the requirements
       seccompProfile:
         type: Unconfined
       allowPrivilegeEscalation: true
-    command: [ "/lib/systemd/systemd" ] # Optional. Remove if you don't want systemd
+    command: [/lib/systemd/systemd]       # Optional. Remove if you don't want systemd
     tty: true
     stdin: true
     workingDir: /workspace
@@ -28,10 +28,9 @@ spec:
     - name: source_code
       mountPath: /workspace
   volumes:
-    - name: localtime
-      hostPath:
-        path: /usr/share/zoneinfo/UTC # Change this to your desired timezone
-    - name: source_code
-      hostPath:
-        path: ../
----
+  - name: localtime
+    hostPath:
+      path: /usr/share/zoneinfo/UTC   # Change this to your desired timezone
+  - name: source_code
+    hostPath:
+      path: ../
