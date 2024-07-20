@@ -82,15 +82,23 @@ else
 	$(runtime) build -f $(project_name)/Dockerfile -t localhost/$(project_name):dev .
 endif
 
-.PHONY: list
-list:
-	@LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | \
-	awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | \
-   	sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'
-
+.ONESHELL:
 _makegen: _prebuild
 	rm -f Makefile
 	printf "all:\n" >> Makefile
+	printf "\nlist:\n" >> Makefile
+	printf "\t@" >> Makefile
+	cat <<- "EOF" >> Makefile
+		LC_ALL=C $$(MAKE) -pRrq -f $$(firstword $$(MAKEFILE_LIST)) : 2>/dev/null | \
+	EOF
+	printf "\t" >> Makefile
+	cat <<- "EOF" >> Makefile
+		awk -v RS= -F: '/(^|\n)# Files(\n|$$$$)/,/(^|\n)# Finished Make data base/ {if ($$$$1 !~ "^[#.]") {print $$$$1}}' | \
+	EOF
+	printf "\t" >> Makefile
+	cat <<- "EOF" >> Makefile
+		sort | grep -E -v -e '^[^[:alnum:]]' -e '^$$@$$$$'
+	EOF
 	printf "\nenvcreate:\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
