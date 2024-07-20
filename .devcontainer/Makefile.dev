@@ -72,12 +72,14 @@ endif
 
 baseimage: _prebuild
 ifeq ($(optimized), true)
+	$(runtime) inspect localhost/$(project_name):dev 2>&1 > /dev/null && exit 0 || \
+	$(runtime) inspect localhost/project-name:dev 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:dev localhost/$(project_name):dev && exit 0 || \
 	$(runtime) inspect localhost/project-name:base 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:base localhost/$(project_name):base || \
-	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base .
-	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev .
-	$(runtime) build -f $(project_name)/Dockerfile.base -t localhost/$(project_name):base .
-	$(runtime) build -f $(project_name)/Dockerfile.dev -t localhost/$(project_name):dev .
+	$(runtime) tag localhost/project-name:base localhost/$(project_name):base && \
+	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev -t localhost/$(project_name):dev . && exit 0 || \
+	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base -t localhost/$(project_name):base . && \
+	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev -t localhost/$(project_name):dev .
 else
 	$(runtime) build -f $(project_name)/Dockerfile -t localhost/$(project_name):dev .
 endif
@@ -164,6 +166,5 @@ endif
 	printf "\trm -f docker-compose.yaml\n" >> Makefile
 	printf "\trm -f pod.yaml\n" >> Makefile
 	printf "\trm -f Makefile\n" >> Makefile
-	printf "\trm -f .optimized\n" >> Makefile
 
 gendevenv: Makefile

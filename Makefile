@@ -37,7 +37,6 @@ ifeq ($(strip $(action)), generate)
 endif
 endif
 ifeq ($(optimized), true)
-	touch .devcontainer/.optimized
 	$(MAKE) -C .devcontainer -f Makefile.dev baseimage
 endif
 ifneq ($(strip $(action)), generate)
