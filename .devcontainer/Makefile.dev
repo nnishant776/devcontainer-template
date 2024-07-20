@@ -155,7 +155,8 @@ else
 endif
 	printf "\nenvpurge: envdestroy\n" >> Makefile
 ifeq ($(editor), cli)
-	printf "\t$(runtime) image rm localhost/$(project_name):dev\n"
+	printf "\t$(runtime) image rm localhost/$(project_name):dev\n" >> Makefile
+	printf "\t$(runtime) image rm localhost/$(project_name):base\n" >> Makefile
 else
 	# $(runtime) container rm vscode-$(container_name)
 endif
