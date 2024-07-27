@@ -26,6 +26,7 @@
         "--userns=host"
     ],
     "containerEnv": {
+        "SHELL": "/usr/bin/bash",
         "TZ": "UTC"
     },
     "workspaceFolder": "/workspace",

@@ -23,11 +23,11 @@ spec:
     stdin: true
     workingDir: /workspace
     env:
+      - name: SHELL
+        value: /usr/bin/bash
       - name: TZ
         value: UTC
     volumeMounts:
-    - name: localtime
-      mountPath: /etc/localtime
     - name: source_code
       mountPath: /workspace
   volumes:
