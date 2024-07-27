@@ -18,5 +18,6 @@ RUN apt -y install --no-install-recommends \
     manpages-dev \
     build-essential
 
-
 RUN apt -y clean all
+
+ENV SHELL=/usr/bin/bash
