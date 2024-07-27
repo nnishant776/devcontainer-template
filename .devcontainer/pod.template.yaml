@@ -22,15 +22,15 @@ spec:
     tty: true
     stdin: true
     workingDir: /workspace
+    env:
+      - name: TZ
+        value: UTC
     volumeMounts:
     - name: localtime
       mountPath: /etc/localtime
     - name: source_code
       mountPath: /workspace
   volumes:
-  - name: localtime
-    hostPath:
-      path: /usr/share/zoneinfo/UTC   # Change this to your desired timezone
   - name: source_code
     hostPath:
       path: ../

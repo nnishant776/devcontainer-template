@@ -17,6 +17,7 @@ services:
     working_dir: /workspace
     environment:
       SHELL: /usr/bin/bash
+      TZ: UTC
     security_opt:
     - label=disable
     - seccomp=unconfined
