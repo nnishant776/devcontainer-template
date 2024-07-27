@@ -25,6 +25,9 @@
         "--network=host",
         "--userns=host"
     ],
+    "containerEnv": {
+        "TZ": "UTC"
+    },
     "workspaceFolder": "/workspace",
     "overrideCommand": true,
     "remoteUser": "root",
