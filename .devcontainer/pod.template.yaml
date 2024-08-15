@@ -14,19 +14,19 @@ spec:
     securityContext:
       privileged: true
       capbilities:
-        add: [SYS_PTRACE]       # Add more capabilities based on the requirements
+        add: [SYS_PTRACE]             # Add more capabilities based on the requirements
       seccompProfile:
         type: Unconfined
       allowPrivilegeEscalation: true
-    command: [/lib/systemd/systemd]       # Optional. Remove if you don't want systemd
+    command: [/lib/systemd/systemd]             # Optional. Remove if you don't want systemd
     tty: true
     stdin: true
     workingDir: /workspace
     env:
-      - name: SHELL
-        value: /usr/bin/bash
-      - name: TZ
-        value: UTC
+    - name: SHELL
+      value: /usr/bin/bash
+    - name: TZ
+      value: UTC
     volumeMounts:
     - name: source_code
       mountPath: /workspace
