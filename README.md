@@ -59,7 +59,7 @@ _optimized = false # true or false (use if for multi stage builds)
 ### Change the mode of editing
 After runtime configuration, you also have the option to choose your mode of code editing. The options available are `cli` (terminal based) and `vscode` (GUI based). Selecting either will configure and create the devcontainers and the associated configuration depending on the respective choice.
 
-**NOTE**:
+> [!NOTE]
 > If the choice for the editor is `vscode`, the user is expected to have a valid, updated installation of `@devcontainers/cli` (required for creating the devcontainer). If you don't want this, the other option is to just generate the devconatainer.json file (see below) for your project and let VSCode handle it from there. Currently, this project doesn't support installation of nodejs/npm, and there are no such plans in the future.
 
 ```make
@@ -85,8 +85,8 @@ _optimized = false # true or false (use if for multi stage builds)
 ```
 Given that `docker` is the most prevalant choice for most user, container oschestration through `docker-compose.yaml` is readily supported.
 
-**NOTE**:
-> Currrently, choosing `pod` for container management requires that you choose the runtime as `podman` as the `docke` runtime doesn't support launching containers through pod specification.
+> [!NOTE]
+> Currrently, choosing `pod` for container management requires that you choose the runtime as `podman` as the `docker` runtime doesn't support launching containers through pod specification.
 
 ### Enable build optimization
 If you plan to use this template for multiple projects on the same machine, changing the `_optimized` setting to `true` would be helpful with the container build times. This option allows the runtimes to do multi-stage builds as it creates separate layered base and development images. As long as the steps are not modified, the existing base and dev images should drastically reduce the time to bring up new devcontainers in different projects
