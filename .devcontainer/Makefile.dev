@@ -125,7 +125,7 @@ endif
 	printf "\nenventer: envstart\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	printf "\tpodman exec -it $(project_name)-$(container_name) bash\n" >> Makefile
+	printf "\tpodman exec --detach-keys 'ctrl-@,ctrl-q' -it $(project_name)-$(container_name) bash\n" >> Makefile
 else
 	printf "\t$(runtime) compose exec development bash\n" >> Makefile
 endif
