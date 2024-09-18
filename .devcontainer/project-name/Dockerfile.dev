@@ -47,4 +47,4 @@ RUN go install "github.com/cweill/gotests/gotests@latest" && \
     go install "github.com/segmentio/golines@latest" && \
     go install "golang.org/x/tools/cmd/goimports@latest"
 
-RUN env features=ide nvim --headless "+Lazy restore" "+TSUpdateSync" "+qa"
+RUN env features=ide nvim --headless "+Lazy restore" "+qa"
