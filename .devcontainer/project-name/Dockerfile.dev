@@ -29,6 +29,10 @@ RUN cd ~ && \
     rm -rf ~/dotfiles
 
 RUN cd ~ && \
+    git clone --recursive --depth=1 --bare https://github.com/nnishant776/dotfiles ~/.dotfiles && \
+    git --git-dir=~/.dotfiles --work-tree=~/ checkout main -- .profile .bashrc .local
+
+RUN cd ~ && \
     rm -rf ~/.config/nvim && \
     git clone --recursive --depth=1 -b dev https://github.com/nnishant776/init.lua ~/.config/nvim
 
