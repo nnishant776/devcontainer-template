@@ -22,19 +22,25 @@ To use this in an existing repository, follow below steps.
 - Add a new remote for this repository in the local copy of __your__ repository
   ```shell
   $ git remote add devcont https://github.com/nnishant776/devcontainer-template
+  $ git fetch --prune --all
   ```
 - Import files from this repository in your repository
   ```shell
   $ git checkout devcont/main -- .
   ```
+  >NOTE: Given that most repositories have `README.md` at the project root, running above command could modify the original `README.md` file. To avoid that use the command below
+  ```
+  $ git checkout devcont/main -- .devcontainer Makefile.devcontainer
+  ```
 
 ## Configuration
-This is Makefile based workflow. So, to configure this for a particular repository, some changes must be made.
+To configure this for a particular repository, some changes must be made.
 
-Do note that since this is `Makefile` based, the configurations mentioned below could also be passed at the time of invocation of the `make` command, but the optimal way would be to edit the defaults here in case you want to share the configuration for a given project. This would help with consistent, reproducible builds for the devcontainer.
+> [!NOTE]
+> The configurations mentioned below could also be passed at the time of invocation of the `make` command, but the optimal/recommended way is to edit the defaults for a given project. This would help in creating consistent, reproducible builds for the devcontainer.
 
 ### Change the default project name
-In the root `Makefile` file, make the changes at the indicated position
+In the root `Makefile.devcontainer` file, make the changes at the indicated position
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
@@ -45,7 +51,7 @@ _editor = cli # cli, vscode
 ```
 
 ### Change the default container runtime
-Once the project name is updated, the next step is to update the container runtime you want to work with. The default is set to `podman` here but docker is also supported. So, you can change this to `docker` as well.
+Once the project name is updated, the next step is to update the container runtime you want to work with. The default is set to `podman` here but docker is also supported.
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
@@ -60,7 +66,7 @@ _optimized = false # true or false (use if for multi stage builds)
 After runtime configuration, you also have the option to choose your mode of code editing. The options available are `cli` (terminal based) and `vscode` (GUI based). Selecting either will configure and create the devcontainers and the associated configuration depending on the respective choice.
 
 > [!NOTE]
-> If the choice for the editor is `vscode`, the user is expected to have a valid, updated installation of `@devcontainers/cli` (required for creating the devcontainer). If you don't want this, the other option is to just generate the devconatainer.json file (see below) for your project and let VSCode handle it from there. Currently, this project doesn't support installation of nodejs/npm, and there are no such plans in the future.
+> If the choice for the editor is `vscode`, the user is expected to have a valid, updated installation of `@devcontainers/cli` (npm package required for creating the devcontainer). If the `devcontainer` cli application is not discoverable in the PATH, the devcontainer creation using this workflow will fail. To avoid this, the other option is to just generate the devconatainer.json file (see below) for your project and let VSCode handle it. Currently, this project doesn't support installation of nodejs/npm, and there are no such plans in the future.
 
 ```make
 # Either edit below variables to their desired value or provide these in the command line
@@ -86,7 +92,7 @@ _optimized = false # true or false (use if for multi stage builds)
 Given that `docker` is the most prevalant choice for most user, container oschestration through `docker-compose.yaml` is readily supported.
 
 > [!NOTE]
-> Currrently, choosing `pod` for container management requires that you choose the runtime as `podman` as the `docker` runtime doesn't support launching containers through pod specification.
+> Currrently, choosing `pod` for container management requires that you choose the runtime as `podman` as `docker` doesn't support launching containers through pod specification.
 
 ### Enable build optimization
 If you plan to use this template for multiple projects on the same machine, changing the `_optimized` setting to `true` would be helpful with the container build times. This option allows the runtimes to do multi-stage builds as it creates separate layered base and development images. As long as the steps are not modified, the existing base and dev images should drastically reduce the time to bring up new devcontainers in different projects
@@ -115,54 +121,44 @@ vcs = false # true, false (setting to true will add new/modified devcontainer fi
 ```
 
 ## Devcontainer operations
-- Config generation
+After you have modified the `Makefile.devcontainer` based on your preferences, follow below steps to create and use the devcontainer.
 
-  After all the configuration is done, we can generate the devcontainer configuration. To do so, run the following command.
+- Generate devcontainer configuration
   ```shell
-  $ make devcontainer action=generate
+  $ make -f Makefile.devcontainer devcontainer action=generate
   ```
 
-- Creatig the devcontainer
-
-  To create the devcontainers, run the following command
+- Create the devcontainer
   ```shell
-  $ make devcontainer action=create
+  $ make -f Makefile.devcontainer devcontainer action=create
   ```
 
-- Starting the container
-
-  Once the container is create, we can start the container with the command below
+- Start the container
   ```shell
-  $ make devcontainer action=start
+  $ make -f Makefile.devcontainer devcontainer action=start
   ```
 
-- Entering the container
-
-  As a shortcut to avoid starting and entering separately, the `enter` action first starts the container and then enters it
+- Enter the container
   ```shell
-  $ make devcontainer action=enter
+  $ make -f Makefile.devcontainer devcontainer action=enter
   ```
 
-- Stopping the container
-
-  To stop the containers (without destroying), run the following command
+- Stop the container
   ```shell
-  $ make devcontainer action=stop
+  $ make -f Makefile.devcontainer devcontainer action=stop
   ```
 
-- Removing the container
-
-  To remote (destroy) the containers, run the following command
+- Remove the container
   ```shell
-  $ make devcontainer action=destroy
+  $ make -f Makefile.devcontainer devcontainer action=destroy
   ```
 
-- Cleaning the devcontainer
-
-  To restore the devcontainer configuration back to its original state, run the following command
-  ```shell
-  $ make devcontainer action=clean
+- Remove the container and cleanup images
+  ```
+  $ make -f Makefile.devcontainer devcontainer action=purge
   ```
 
-## Customization
-You can edit the exising devcontainer configuration or the root `Makefile` to customize this and suit to your needs to have a unified `Makefile` based workflow for development, build, testing, etc...
+- Restore the devcontainer configuration back to its original state
+  ```shell
+  $ make -f Makefile.devcontainer devcontainer action=clean
+  ```
