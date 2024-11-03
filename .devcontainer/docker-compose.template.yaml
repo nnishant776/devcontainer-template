@@ -7,9 +7,10 @@ services:
       dockerfile: project-name/Dockerfile
     cap_add:
     - SYS_PTRACE   # Add more capabilities based on the requirements
-    command: [/lib/systemd/systemd]     # Optional. Remove if you don't want systemd
+    command: [/lib/systemd/systemd]     # Optional. Remove/Change if you don't want systemd
     container_name: container-name
     userns_mode: host
+    stop_signal: SIGRTMIN+3             # Optional. Remove/Change if you don't want systemd
     privileged: true
     network_mode: host
     tty: true
@@ -22,9 +23,10 @@ services:
     - label=disable
     - seccomp=unconfined
     tmpfs:
-    - /run   # optional. needed only if using systemd
-    - /tmp   # optional. needed only if using systemd
-    - /var/log/journal   # optional. needed only if using systemd
+    - /run                              # Optional. Remove/Change if you don't want systemd
+    - /tmp                              # Optional. Remove/Change if you don't want systemd
+    - /run/lock                         # Optional. Remove/Change if you don't want systemd
+    - /var/log/journal                  # Optional. Remove/Change if you don't want systemd
     volumes:
     - ../:/workspace
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro   # optional. needed only if using systemd
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro  # Optional. Remove/Change if you don't want systemd

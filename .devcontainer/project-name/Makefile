@@ -38,6 +38,7 @@ devtools:
 	go install "golang.org/x/tools/gopls@latest"
 	go install "github.com/segmentio/golines@latest"
 	go install "golang.org/x/tools/cmd/goimports@latest"
+	go install "github.com/golang/mock/mockgen@latest"
 
 editorapp:
 	curl -G -L https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz -o ~/nvim-linux64.tar.gz

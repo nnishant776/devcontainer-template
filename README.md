@@ -38,9 +38,8 @@ In the root `Makefile` file, make the changes at the indicated position
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-_project_name = project-name      <---- Change this to the project name of your choice
-_runtime = podman # podman, docker
-_editor = cli # cli, vscode
+export project_name:=project-name   <---- Change this to the project name of your choice
+export runtime:=podman
 ...
 ```
 
@@ -49,12 +48,11 @@ Once the project name is updated, the next step is to update the container runti
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-_project_name = project-name
-_runtime = podman # podman, docker   <---- Change this to either docker or podman
-_editor = cli # cli, vscode
-_infra = pod # pod, compose (pod is only supported with podman)
-_optimized = false # true or false (use if for multi stage builds)
+export project_name:=project-name
+export runtime:=podman              <---- Change this to either docker or podman
 ```
+> [!NOTE]
+> If the container engine is selected as `docker`, and the container's init program is set as `systemd`, make sure to take proper steps to support `systemd` with `docker`
 
 ### Change the mode of editing
 After runtime configuration, you also have the option to choose your mode of code editing. The options available are `cli` (terminal based) and `vscode` (GUI based). Selecting either will configure and create the devcontainers and the associated configuration depending on the respective choice.
@@ -65,11 +63,8 @@ After runtime configuration, you also have the option to choose your mode of cod
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-_project_name = project-name
-_runtime = podman # podman, docker
-_editor = cli # cli, vscode   <---- Change this to either cli or vscode
-_infra = pod # pod, compose (pod is only supported with podman)
-_optimized = false # true or false (use if for multi stage builds)
+devcontainer: editor:=cli           <---- Change this to either cli or vscode
+devcontainer: infra:=pod
 ```
 
 ### Change the default container manager
@@ -77,11 +72,8 @@ After the editor choice selection, we need to decide how the created containers 
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-_project_name = project-name
-_runtime = podman # podman, docker
-_editor = cli # cli, vscode
-_infra = pod # pod, compose (pod is only supported with podman)   <---- Change this to either docker or podman
-_optimized = false # true or false (use if for multi stage builds)
+devcontainer: editor:=cli
+devcontainer: infra:=pod            <---- Change this to either pod or compose
 ```
 Given that `docker` is the most prevalant choice for most user, container oschestration through `docker-compose.yaml` is readily supported.
 
@@ -93,25 +85,14 @@ If you plan to use this template for multiple projects on the same machine, chan
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-_project_name = project-name
-_runtime = podman # podman, docker
-_editor = cli # cli, vscode
-_infra = pod # pod, compose (pod is only supported with podman)
-_optimized = false # true or false (use if for multi stage builds) <---- Change this to true to help with caching
+devcontainer: infra:=pod
+devcontainer: optimized:=false      <---- Change this to true to help with caching
 ```
 ### Check the generated files into VCS
 You can select to add the generated files and the modified configuration to be tracked in vcs by default. To enable this, set the `vcs` option to `true`. This is off by default, i.e., the generated configuration will not be tracked by vcs
 ```make
-_infra = compose # pod, compose (pod is only supported with podman)
-_optimized = false # true or false (use if for multi stage builds)
-
-project_name = $(strip $(_project_name))
-runtime = $(strip $(_runtime))
-editor = $(strip $(_editor))
-infra = $(strip $(_infra))
-optimized = $(strip $(_optimized))
-container_name = ${project_name}-dev
-vcs = false # true, false (setting to true will add new/modified devcontainer files to the working tree)  <----
+devcontainer: container_name:=$(project_name)-dev
+devcontainer: vcs:=false            <---- Change this to true to check in generated files
 ```
 
 ## Devcontainer operations

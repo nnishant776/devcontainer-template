@@ -1,3 +1,10 @@
+editor:=cli
+infra:=pod
+optimized:=false
+container_name:=$(project_name)-dev
+vcs:=false
+action:=
+
 all:
 
 _validations:
@@ -22,15 +29,15 @@ endif
 endif
 
 Makefile: _makegen
-	-test -d ../.git && sed -i "/.devcontainer/d" ../.git/info/exclude
-	-test -d ../.git && sed -i "/\/Makefile.devcontainer/d" ../.git/info/exclude
-	-test -f ../.git && sed -i "/.devcontainer/d" $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
-	-test -f ../.git && sed -i "/\/Makefile.devcontainer/d" $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+	- [ -d ../.git ] && sed -i "/.devcontainer/d" ../.git/info/exclude
+	- [ -d ../.git ] && sed -i "/\/Makefile.devcontainer/d" ../.git/info/exclude
+	- [ -f ../.git ] && sed -i "/.devcontainer/d" $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+	- [ -f ../.git ] && sed -i "/\/Makefile.devcontainer/d" $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
 ifeq ($(strip $(vcs)), false)
-	-test -d ../.git && echo "/.devcontainer" >> ../.git/info/exclude
-	-test -d ../.git && echo "/Makefile.devcontainer" >> ../.git/info/exclude
-	-test -f ../.git && echo "/.devcontainer" >> $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
-	-test -f ../.git && echo "/Makefile.devcontainer" >> $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+	- [ -d ../.git ] && echo "/.devcontainer" >> ../.git/info/exclude
+	- [ -d ../.git ] && echo "/Makefile.devcontainer" >> ../.git/info/exclude
+	- [ -f ../.git ] && echo "/.devcontainer" >> $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
+	- [ -f ../.git ] && echo "/Makefile.devcontainer" >> $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude
 endif
 
 
@@ -109,8 +116,8 @@ else
 	printf "\t$(runtime) compose build\n" >> Makefile
 endif
 else
-	# Ensure that devcontainer cli is installed (sudo npm install -g @devcontainers/cli)
-	printf "\tdevcontainer build ..\n" >> Makefile
+	# Ensure that devcontainer cli is installed (via 'Dev Containers' extension in VSCode)
+	printf "\t$$(find ~/.config/Code/User -name devcontainer) build ..\n" >> Makefile
 endif
 	printf "\nenvstart:\n" >> Makefile
 ifeq ($(editor), cli)
@@ -120,7 +127,7 @@ else
 	printf "\t$(runtime) compose up -d\n" >> Makefile
 endif
 else
-	printf "\tdevcontainer up --docker-path $(runtime) --workspace-folder ..\n" >> Makefile
+	printf "\t$$(find ~/.config/Code/User -name devcontainer) up --docker-path $(runtime) --workspace-folder ..\n" >> Makefile
 endif
 	printf "\nenventer: envstart\n" >> Makefile
 ifeq ($(editor), cli)
@@ -131,7 +138,7 @@ else
 endif
 else
 	# Ensure that vscode binary is discoverable in $PATH
-	printf "\tdevcontainer open ..\n" >> Makefile
+	printf "\t$$(find ~/.config/Code/User -name devcontainer) open ..\n" >> Makefile
 endif
 	printf "\nenvstop:\n" >> Makefile
 ifeq ($(editor), cli)
