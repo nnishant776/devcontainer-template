@@ -15,12 +15,12 @@ all:
 # optimized := false # true or false (use if for multi stage builds)
 # container_name := <User input>
 # vcs := false # true, false (setting to true will add new/modified devcontainer files to the working tree)
-devcontainer: editor:=cli
-devcontainer: infra:=pod
-devcontainer: optimized:=false
-devcontainer: container_name:=$(project_name)-dev
-devcontainer: vcs:=false
-devcontainer: action:=
+devcontainer: export editor:=cli
+devcontainer: export infra:=pod
+devcontainer: export optimized:=false
+devcontainer: export container_name:=$(project_name)-dev
+devcontainer: export vcs:=false
+devcontainer: export action:=
 devcontainer:
 ifeq ($(strip $(action)),)
 	echo "Invalid/empty action '$(action)'. Please specify one out of create, start, enter, stop, destroy, purge, clean"

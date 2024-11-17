@@ -63,8 +63,8 @@ After runtime configuration, you also have the option to choose your mode of cod
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-devcontainer: editor:=cli           <---- Change this to either cli or vscode
-devcontainer: infra:=pod
+devcontainer: export editor:=cli           <---- Change this to either cli or vscode
+devcontainer: export infra:=pod
 ```
 
 ### Change the default container manager
@@ -72,8 +72,8 @@ After the editor choice selection, we need to decide how the created containers 
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-devcontainer: editor:=cli
-devcontainer: infra:=pod            <---- Change this to either pod or compose
+devcontainer: export editor:=cli
+devcontainer: export infra:=pod            <---- Change this to either pod or compose
 ```
 Given that `docker` is the most prevalant choice for most user, container oschestration through `docker-compose.yaml` is readily supported.
 
@@ -85,14 +85,14 @@ If you plan to use this template for multiple projects on the same machine, chan
 ```make
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables to get reproducible builds
-devcontainer: infra:=pod
-devcontainer: optimized:=false      <---- Change this to true to help with caching
+devcontainer: export infra:=pod
+devcontainer: export optimized:=false      <---- Change this to true to help with caching
 ```
 ### Check the generated files into VCS
 You can select to add the generated files and the modified configuration to be tracked in vcs by default. To enable this, set the `vcs` option to `true`. This is off by default, i.e., the generated configuration will not be tracked by vcs
 ```make
-devcontainer: container_name:=$(project_name)-dev
-devcontainer: vcs:=false            <---- Change this to true to check in generated files
+devcontainer: export container_name:=$(project_name)-dev
+devcontainer: export vcs:=false            <---- Change this to true to check in generated files
 ```
 
 ## Devcontainer operations
