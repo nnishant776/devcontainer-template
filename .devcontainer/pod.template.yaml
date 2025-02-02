@@ -3,34 +3,40 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: project-name
+  name: container-prefix
   namespace: project-name-dev
   labels:
-    app: project-name
+    app: container-prefix
 spec:
   containers:
   - name: container-name
     image: localhost/project-name:dev
     securityContext:
-      privileged: true
+      privileged: false
+      seLinuxOptions:
+        type: spc_t
       capbilities:
         add: [SYS_PTRACE]             # Add more capabilities based on the requirements
       seccompProfile:
         type: Unconfined
-      allowPrivilegeEscalation: true
-    command: [/lib/systemd/systemd]             # Optional. Remove if you don't want systemd
+      allowPrivilegeEscalation: false
     tty: true
     stdin: true
     workingDir: /workspace
     env:
     - name: SHELL
-      value: /usr/bin/bash
+      value: /bin/bash
     - name: TZ
       value: UTC
     volumeMounts:
     - name: source_code
       mountPath: /workspace
+    - name: user_home
+      mountPath: user-home
   volumes:
   - name: source_code
     hostPath:
       path: ../
+  - name: user_home
+    hostPath:
+      path: user-home

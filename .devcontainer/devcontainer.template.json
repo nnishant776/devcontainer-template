@@ -17,16 +17,21 @@
             "source": "${localWorkspaceFolder}",
             "target": "/workspace",
             "type": "bind"
+        },
+        {
+            "source": "${localEnv:HOME}",
+            "target": "${localEnv:HOME}",
+            "type": "bind"
         }
     ],
     "runArgs": [
         "--name",
-        "vscode-container-name",
+        "container-prefix-container-name",
         "--network=host",
         "--userns=host"
     ],
     "containerEnv": {
-        "SHELL": "/usr/bin/bash",
+        "SHELL": "/bin/bash",
         "TZ": "UTC"
     },
     "workspaceFolder": "/workspace",

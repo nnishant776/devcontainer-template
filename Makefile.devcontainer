@@ -1,9 +1,10 @@
 # Either edit below variables to their desired value or provide these in the command line
 # Recommended to edit the variables (defined below) to get reproducible builds
 #
+# project_root ::= <the directory this makefile is present in>
 # project_name := project-name
 # runtime := podman # podman, docker
-
+export project_root::=$(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 export project_name:=project-name
 export runtime:=podman
 
@@ -15,12 +16,17 @@ all:
 # optimized := false # true or false (use if for multi stage builds)
 # container_name := <User input>
 # vcs := false # true, false (setting to true will add new/modified devcontainer files to the working tree)
+# rootless := true # true, false (only used when runtime is docker; enables rootless mode)
+# minimal := true # true, false (uses alpine version for the base image if true)
 devcontainer: export editor:=cli
 devcontainer: export infra:=pod
-devcontainer: export optimized:=false
-devcontainer: export container_name:=$(project_name)-dev
+devcontainer: export optimized:=true
+devcontainer: export container_name:=devcontainer
+devcontainer: export container_prefix:=$(project_name)
 devcontainer: export vcs:=false
+devcontainer: export rootless:=true
 devcontainer: export action:=
+devcontainer: export minimal:=true
 devcontainer:
 ifeq ($(strip $(action)),)
 	echo "Invalid/empty action '$(action)'. Please specify one out of create, start, enter, stop, destroy, purge, clean"

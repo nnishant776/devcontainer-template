@@ -1,9 +1,26 @@
+runtime_args:=
+compose:=
 editor:=cli
 infra:=pod
-optimized:=false
-container_name:=$(project_name)-dev
+optimized:=true
+container_name:=devcontainer
+container_prefix:=$(project_name)
+rootless:=true
 vcs:=false
 action:=
+devcontainer_compose_arg:=
+minimal:=true
+
+ifeq ($(runtime), docker)
+ifeq ($(rootless), true)
+$(eval runtime_args:=--context rootless)
+endif
+else ifeq ($(runtime), podman)
+ifneq ($(shell podman compose 2>&1 > /dev/null; echo $$?), 0)
+$(eval compose:=podman-compose)
+$(eval devcontainer_compose_arg:=--docker-compose-path $(compose))
+endif
+endif
 
 all:
 
@@ -15,7 +32,7 @@ endif
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
 ifeq ($(runtime), docker)
-	echo "Invalid configuration. Docker doens't support local pods"
+	echo "Invalid configuration. Docker doesn't support local pods"
 	exit 1
 endif
 endif
@@ -46,6 +63,13 @@ _prebuild: _validations
 	rm -rf $(project_name)
 
 	cp -r project-name/ $(project_name)/
+ifeq ($(minimal), true)
+	cp $(project_name)/Dockerfile.alpine.dev $(project_name)/Dockerfile.dev
+	cp $(project_name)/Dockerfile.alpine.base $(project_name)/Dockerfile.base
+else
+	cp $(project_name)/Dockerfile.debian.dev $(project_name)/Dockerfile.dev
+	cp $(project_name)/Dockerfile.debian.base $(project_name)/Dockerfile.base
+endif
 
 	mkdir -p project-name/project-name
 	cp project-name/Makefile project-name/project-name/
@@ -60,19 +84,17 @@ _prebuild: _validations
 ifeq ($(editor), vscode)
 ifeq ($(infra), compose)
 	cp devcontainer-compose.template.json devcontainer.json
-	sed -i "s/container-name/vscode-container-name/g" devcontainer.json
-	sed -i "/command:/d" docker-compose.yaml
 endif
 endif
 
 	find $(project_name) -type f -exec sed -i "s/project-name/$(project_name)/g" {} \;
 
-	sed -i "s/project-name/$(project_name)/g" docker-compose.yaml
-	sed -i "s/project-name/$(project_name)/g" pod.yaml
-	sed -i "s/project-name/$(project_name)/g" devcontainer.json
-	sed -i "s/container-name/$(container_name)/g" devcontainer.json
-	sed -i "s/container-name/$(container_name)/g" pod.yaml
-	sed -i "s/container-name/$(container_name)/g" docker-compose.yaml
+	for file in docker-compose.yaml pod.yaml devcontainer.json; do \
+		sed -i "s|project-name|$(project_name)|g" $$file || true ; \
+		sed -i "s|container-name|$(container_name)|g" $$file || true ; \
+		sed -i "s|container-prefix|$(container_prefix)|g" $$file || true ; \
+		sed -i "s|user-home|$${HOME}|g" $$file || true ; \
+	done
 
 	cat $(project_name)/Dockerfile.base > $(project_name)/Dockerfile
 	sed '1d' $(project_name)/Dockerfile.dev >> $(project_name)/Dockerfile
@@ -97,69 +119,98 @@ _makegen: _prebuild
 	printf "all:\n" >> Makefile
 	printf "\nlist:\n" >> Makefile
 	printf "\t@" >> Makefile
-	cat <<- "EOF" >> Makefile
-		LC_ALL=C $$(MAKE) -pRrq -f $$(firstword $$(MAKEFILE_LIST)) : 2>/dev/null | \
-	EOF
-	printf "\t" >> Makefile
-	cat <<- "EOF" >> Makefile
-		awk -v RS= -F: '/(^|\n)# Files(\n|$$$$)/,/(^|\n)# Finished Make data base/ {if ($$$$1 !~ "^[#.]") {print $$$$1}}' | \
-	EOF
-	printf "\t" >> Makefile
-	cat <<- "EOF" >> Makefile
-		sort | grep -E -v -e '^[^[:alnum:]]' -e '^$$@$$$$'
-	EOF
+	printf "LC_ALL=C \$$(MAKE) -pRrq -f \$$(firstword \$$(MAKEFILE_LIST)) \\: 2>/dev/null | \\" >> Makefile
+	printf "\n\t" >> Makefile
+	printf "awk -v RS= -F: '/(^|\\\n)# Files(\\\n|\$$\$$)/,/(^|\\\n)# Finished Make data base/ {if (\$$\$$1 !~ \"^[#.]\") {print \$$\$$1}}' | \\" >> Makefile
+	printf "\n\t" >> Makefile
+	printf "sort | grep -E -v -e '^[^[:alnum:]]' -e '^\$$@\$$\$$'\n" >> Makefile
+
+
+# envcreate: ...
 	printf "\nenvcreate:\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
 	printf "\tpodman kube play --replace pod.yaml --network=host\n" >> Makefile
+else ifneq ($(compose),)
+	printf "\t$(compose) build\n" >> Makefile
 else
-	printf "\t$(runtime) compose build\n" >> Makefile
+	printf "\t$(runtime) $(runtime_args) compose build\n" >> Makefile
 endif
 else
 	# Ensure that devcontainer cli is installed (via 'Dev Containers' extension in VSCode)
-	printf "\t$$(find ~/.config/Code/User -name devcontainer) build ..\n" >> Makefile
+ifeq ($(runtime), docker)
+ifeq ($(rootless), true)
+	printf "\tenv DOCKER_CONTEXT=rootless " >> Makefile
 endif
+endif
+	printf "\t$$(find ~/.config/Code/User -name devcontainer) build --docker-path $(runtime) $(devcontainer_compose_args) ..\n" >> Makefile
+endif
+
+
+# envstart: ...
 	printf "\nenvstart:\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	printf "\tpodman pod start $(project_name)\n" >> Makefile
+	printf "\tpodman pod start $(container_prefix)\n" >> Makefile
+else ifneq ($(compose),)
+	printf "\t$(compose) up -d --wait\n" >> Makefile
 else
-	printf "\t$(runtime) compose up -d\n" >> Makefile
+	printf "\t$(runtime) $(runtime_args) compose up -d --wait\n" >> Makefile
 endif
 else
-	printf "\t$$(find ~/.config/Code/User -name devcontainer) up --docker-path $(runtime) --workspace-folder ..\n" >> Makefile
+ifeq ($(runtime), docker)
+ifeq ($(rootless), true)
+	printf "\tenv DOCKER_CONTEXT=rootless " >> Makefile
 endif
+endif
+	printf "\t$$(find ~/.config/Code/User -name devcontainer) up --docker-path $(runtime) $(devcontainer_compose_arg) --workspace-folder ..\n" >> Makefile
+endif
+
+
+# enventer: ...
 	printf "\nenventer: envstart\n" >> Makefile
 ifeq ($(editor), cli)
-ifeq ($(infra), pod)
-	printf "\tpodman exec --detach-keys 'ctrl-@,ctrl-q' -it $(project_name)-$(container_name) bash\n" >> Makefile
+	printf "\t$(runtime) $(runtime_args) exec --detach-keys 'ctrl-@,ctrl-q' -it -w $(project_root) $(container_prefix)-$(container_name) bash\n" >> Makefile
 else
-	printf "\t$(runtime) compose exec development bash\n" >> Makefile
+ifeq ($(runtime), docker)
+	printf "\tenv DOCKER_CONTEXT=rootless " >> Makefile
 endif
-else
 	# Ensure that vscode binary is discoverable in $PATH
 	printf "\t$$(find ~/.config/Code/User -name devcontainer) open ..\n" >> Makefile
 endif
+
+
+# envstop: ...
 	printf "\nenvstop:\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
-	printf "\tpodman pod stop $(project_name)\n" >> Makefile
+	printf "\tpodman pod stop $(container_prefix) || true\n" >> Makefile
+else ifneq ($(compose),)
+	printf "\t$(compose) stop || true\n" >> Makefile
 else
-	printf "\t$(runtime) compose stop\n" >> Makefile
+	printf "\t$(runtime) $(runtime_args) compose stop || true\n" >> Makefile
 endif
 else
-	printf "\t$(runtime) stop vscode-$(container_name)\n" >> Makefile
+	printf "\t$(runtime) $(runtime_args) stop $(container_prefix)-$(container_name) || true\n" >> Makefile
 endif
+
+
+# envdestroy: ...
 	printf "\nenvdestroy: envstop\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(infra), pod)
 	printf "\tpodman kube play --down pod.yaml\n" >> Makefile
+else ifneq ($(compose),)
+	printf "\t$(compose) down || true\n" >> Makefile
 else
-	printf "\t$(runtime) compose down\n" >> Makefile
+	printf "\t$(runtime) $(runtime_args) compose down || true\n" >> Makefile
 endif
 else
-	printf "\t$(runtime) container rm vscode-$(container_name)\n" >> Makefile
+	printf "\t$(runtime) $(runtime_args) container rm $(container_prefix)-$(container_name) || true\n" >> Makefile
 endif
+
+
+# envpurge: ...
 	printf "\nenvpurge: envdestroy\n" >> Makefile
 ifeq ($(editor), cli)
 	printf "\t$(runtime) image rm localhost/$(project_name):dev\n" >> Makefile
@@ -167,6 +218,9 @@ ifeq ($(editor), cli)
 else
 	# $(runtime) container rm vscode-$(container_name)
 endif
+
+
+# envclean: ...
 	printf "\nenvclean:\n" >> Makefile
 	printf "\trm -rf $(project_name)\n" >> Makefile
 	printf "\trm -rf project-name/project-name\n" >> Makefile

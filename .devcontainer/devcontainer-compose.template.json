@@ -2,6 +2,6 @@
     "dockerComposeFile": [
         "docker-compose.yaml"
     ],
-    "service": "development",
+    "service": "devcontainer",
     "workspaceFolder": "/workspace"
 }

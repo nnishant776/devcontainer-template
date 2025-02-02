@@ -1,32 +1,25 @@
 version: '3'
 services:
-  development:
+  devcontainer:
     image: localhost/project-name:dev
     build:
       context: .
       dockerfile: project-name/Dockerfile
     cap_add:
     - SYS_PTRACE   # Add more capabilities based on the requirements
-    command: [/lib/systemd/systemd]     # Optional. Remove/Change if you don't want systemd
-    container_name: container-name
+    container_name: container-prefix-container-name
     userns_mode: host
-    stop_signal: SIGRTMIN+3             # Optional. Remove/Change if you don't want systemd
-    privileged: true
+    privileged: false
     network_mode: host
     tty: true
     stdin_open: true
     working_dir: /workspace
     environment:
-      SHELL: /usr/bin/bash
+      SHELL: /bin/bash
       TZ: UTC
     security_opt:
     - label=disable
     - seccomp=unconfined
-    tmpfs:
-    - /run                              # Optional. Remove/Change if you don't want systemd
-    - /tmp                              # Optional. Remove/Change if you don't want systemd
-    - /run/lock                         # Optional. Remove/Change if you don't want systemd
-    - /var/log/journal                  # Optional. Remove/Change if you don't want systemd
     volumes:
     - ../:/workspace
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro  # Optional. Remove/Change if you don't want systemd
+    - user-home:user-home
