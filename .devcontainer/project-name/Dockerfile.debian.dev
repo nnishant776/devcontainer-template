@@ -10,35 +10,33 @@ RUN mkdir -p -m 755 /etc/apt/keyrings && \
     curl -G -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null && \
     chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg  && \
     echo "deb [arch=$(arch) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-    apt update -y && \
-    apt install -y gh && \
-    apt full-upgrade -y
-
-RUN curl -G -L https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz -o ~/nvim-linux64.tar.gz && \
-    mkdir -p ~/nvim-linux64 && \
-    tar -C ~/nvim-linux64 --strip-components=1 -xf ~/nvim-linux64.tar.gz && \
-    rm -rf ~/nvim-linux64/man && \
-    cp -rf ~/nvim-linux64/* /usr/local/ && \
-    rm -rf ~/nvim-linux64.tar.gz && \
-    rm -rf ~/nvim-linux64
+    apt-get -y update && \
+    apt-get -y install gh
 
 RUN cd ~ && \
     curl -G -L https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/ripgrep_13.0.0_amd64.deb -o ~/ripgrep_13.0.0_amd64.deb && \
     curl -G -L https://github.com/sharkdp/fd/releases/download/v8.7.0/fd-musl_8.7.0_amd64.deb -o ~/fd-musl_8.7.0_amd64.deb && \
-    apt -y install ~/ripgrep_13.0.0_amd64.deb && \
-    apt -y install ~/fd-musl_8.7.0_amd64.deb && \
+    apt-get -y install ~/ripgrep_13.0.0_amd64.deb && \
+    apt-get -y install ~/fd-musl_8.7.0_amd64.deb && \
     rm -rf ~/fd-musl_8.7.0_amd64.deb && \
     rm -rf ~/ripgrep_13.0.0_amd64.deb
 
+RUN curl -G -L https://github.com/neovim/neovim/releases/download/stable/nvim-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz -o ~/nvim.tar.gz && \
+    mkdir -p ~/nvim && \
+    tar -C ~/nvim --strip-components=1 -xf ~/nvim.tar.gz && \
+    rm -rf ~/nvim/man && \
+    cp -rf ~/nvim/* /usr/local/ && \
+    rm -rf ~/nvim.tar.gz && \
+    rm -rf ~/nvim
+
 RUN cd ~ && \
-    git clone --recursive --depth=1 https://github.com/nnishant776/dotfiles ~/dotfiles && \
-    cp ~/dotfiles/.profile ~/.profile && \
-    cp ~/dotfiles/.bashrc ~/.bashrc && \
-    rm -rf ~/dotfiles
+    git clone --recursive --bare --depth=1 https://github.com/nnishant776/dotfiles $HOME/.dotfiles && \
+    git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout main -- .bashrc .profile .local/share/bash && \
+    rm -rf ~/.dotfiles
 
 RUN cd ~ && \
     rm -rf ~/.config/nvim && \
-    git clone --recursive --depth=1 -b dev https://github.com/nnishant776/init.lua ~/.config/nvim
+    git clone --recursive --depth=1 https://github.com/nnishant776/init.lua ~/.config/nvim
 
 RUN go install "github.com/cweill/gotests/gotests@latest" && \
     go install "github.com/fatih/gomodifytags@latest" && \
