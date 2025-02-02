@@ -1,0 +1,24 @@
+FROM golang:alpine AS base
+
+RUN apk update
+
+RUN apk add \
+    git \
+    bash \
+    tree \
+    curl \
+    nano \
+    py3-pip \
+    unzip \
+    tar \
+    gzip \
+    make \
+    file \
+    man-db \
+    gcc \
+    musl-dev \
+    flex \
+    bison \
+    autoconf
+
+ENV SHELL=/bin/bash

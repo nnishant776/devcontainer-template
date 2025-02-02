@@ -1,0 +1,33 @@
+FROM localhost/project-name:base
+
+WORKDIR /root
+
+ENV PS1="[\u@\h \W]# "
+
+COPY project-name/Makefile Makefile
+
+RUN apk add github-cli
+
+RUN apk add ripgrep fd
+
+RUN apk add neovim
+
+RUN cd ~ && \
+    git clone --recursive --bare --depth=1 https://github.com/nnishant776/dotfiles $HOME/.dotfiles && \
+    git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout main -- .bashrc .profile .local/share/bash && \
+    rm -rf ~/.dotfiles
+
+RUN cd ~ && \
+    rm -rf ~/.config/nvim && \
+    git clone --recursive --depth=1 https://github.com/nnishant776/init.lua ~/.config/nvim
+
+RUN go install "github.com/cweill/gotests/gotests@latest" && \
+    go install "github.com/fatih/gomodifytags@latest" && \
+    go install "github.com/josharian/impl@latest" && \
+    go install "honnef.co/go/tools/cmd/staticcheck@latest" && \
+    go install "golang.org/x/tools/gopls@latest" && \
+    go install "github.com/segmentio/golines@latest" && \
+    go install "golang.org/x/tools/cmd/goimports@latest" && \
+    go install "github.com/golang/mock/mockgen@latest"
+
+RUN env features=ide nvim --headless "+Lazy restore" "+qa"
