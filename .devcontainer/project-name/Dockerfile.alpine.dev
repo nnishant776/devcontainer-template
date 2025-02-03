@@ -28,6 +28,6 @@ RUN go install "github.com/cweill/gotests/gotests@latest" && \
     go install "golang.org/x/tools/gopls@latest" && \
     go install "github.com/segmentio/golines@latest" && \
     go install "golang.org/x/tools/cmd/goimports@latest" && \
-    go install "github.com/golang/mock/mockgen@latest"
+    go install "go.uber.org/mock/mockgen@latest"
 
 RUN env features=ide nvim --headless "+Lazy restore" "+qa"
