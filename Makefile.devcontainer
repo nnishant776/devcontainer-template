@@ -31,16 +31,9 @@ devcontainer:
 ifeq ($(strip $(action)),)
 	echo "Invalid/empty action '$(action)'. Please specify one out of create, start, enter, stop, destroy, purge, clean"
 	exit 1
-else
-ifeq ($(strip $(action)), generate)
+else ifeq ($(strip $(action)), generate)
 	$(MAKE) -e -C .devcontainer -f Makefile.dev Makefile
-	exit 0
-endif
-endif
-ifeq ($(optimized), true)
-	$(MAKE) -e -C .devcontainer -f Makefile.dev baseimage
-endif
-ifneq ($(strip $(action)), generate)
+else
 	$(MAKE) -e -C .devcontainer env$(action)
 endif
 

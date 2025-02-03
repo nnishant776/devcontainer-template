@@ -69,14 +69,26 @@ _prebuild: _validations
 
 ifeq ($(minimal), true)
 	cp project-name/Makefile.alpine project-name/project-name/Makefile
+	cp project-name/Makefile.alpine project-name/Makefile
+
+	cp project-name/Dockerfile.alpine.dev project-name/Dockerfile.dev
+	cp project-name/Dockerfile.alpine.base project-name/Dockerfile.base
+
 	cp $(project_name)/Dockerfile.alpine.dev $(project_name)/Dockerfile.dev
 	cp $(project_name)/Dockerfile.alpine.base $(project_name)/Dockerfile.base
+
 	cp $(project_name)/Makefile.alpine $(project_name)/$(project_name)/Makefile
 	cp $(project_name)/Makefile.alpine $(project_name)/Makefile
 else
 	cp project-name/Makefile.debian project-name/project-name/Makefile
+	cp project-name/Makefile.debian project-name/Makefile
+
+	cp project-name/Dockerfile.debian.dev project-name/Dockerfile.dev
+	cp project-name/Dockerfile.debian.base project-name/Dockerfile.base
+
 	cp $(project_name)/Dockerfile.debian.dev $(project_name)/Dockerfile.dev
 	cp $(project_name)/Dockerfile.debian.base $(project_name)/Dockerfile.base
+
 	cp $(project_name)/Makefile.debian $(project_name)/$(project_name)/Makefile
 	cp $(project_name)/Makefile.debian $(project_name)/Makefile
 endif
@@ -104,7 +116,6 @@ endif
 	sed '1d' $(project_name)/Dockerfile.dev >> $(project_name)/Dockerfile
 
 baseimage: _prebuild
-ifeq ($(optimized), true)
 	$(runtime) inspect localhost/$(project_name):dev 2>&1 > /dev/null && exit 0 || \
 	$(runtime) inspect localhost/project-name:dev 2>&1 > /dev/null && \
 	$(runtime) tag localhost/project-name:dev localhost/$(project_name):dev && exit 0 || \
@@ -113,11 +124,7 @@ ifeq ($(optimized), true)
 	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev -t localhost/$(project_name):dev . && exit 0 || \
 	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base -t localhost/$(project_name):base . && \
 	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev -t localhost/$(project_name):dev .
-else
-	$(runtime) build -f $(project_name)/Dockerfile -t localhost/$(project_name):dev .
-endif
 
-.ONESHELL:
 _makegen: _prebuild
 	rm -f Makefile
 	printf "all:\n" >> Makefile
@@ -128,6 +135,10 @@ _makegen: _prebuild
 	printf "awk -v RS= -F: '/(^|\\\n)# Files(\\\n|\$$\$$)/,/(^|\\\n)# Finished Make data base/ {if (\$$\$$1 !~ \"^[#.]\") {print \$$\$$1}}' | \\" >> Makefile
 	printf "\n\t" >> Makefile
 	printf "sort | grep -E -v -e '^[^[:alnum:]]' -e '^\$$@\$$\$$'\n" >> Makefile
+
+ifeq ($(optimized), true)
+	$(MAKE) -e -f Makefile.dev baseimage
+endif
 
 
 # envcreate: ...
@@ -228,6 +239,9 @@ endif
 	printf "\nenvclean:\n" >> Makefile
 	printf "\trm -rf $(project_name)\n" >> Makefile
 	printf "\trm -rf project-name/project-name\n" >> Makefile
+	printf "\trm -rf project-name/Dockerfile.base\n" >> Makefile
+	printf "\trm -rf project-name/Dockerfile.dev\n" >> Makefile
+	printf "\trm -rf project-name/Makefile\n" >> Makefile
 	printf "\trm -f devcontainer.json\n" >> Makefile
 	printf "\trm -f docker-compose.yaml\n" >> Makefile
 	printf "\trm -f pod.yaml\n" >> Makefile
