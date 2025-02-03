@@ -232,5 +232,9 @@ endif
 	printf "\trm -f docker-compose.yaml\n" >> Makefile
 	printf "\trm -f pod.yaml\n" >> Makefile
 	printf "\trm -f Makefile\n" >> Makefile
+	printf "\t- [ -d ../.git ] && sed -i '/.devcontainer/d' ../.git/info/exclude\n" >> Makefile
+	printf "\t- [ -d ../.git ] && sed -i '/\/Makefile.devcontainer/d' ../.git/info/exclude\n" >> Makefile
+	printf "\t- [ -f ../.git ] && sed -i '/.devcontainer/d' $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude\n" >> Makefile
+	printf "\t- [ -f ../.git ] && sed -i '/\/Makefile.devcontainer/d' $(shell cat ../.git | cut -d ':' -f 2)/../../info/exclude\n" >> Makefile
 
 gendevenv: Makefile
