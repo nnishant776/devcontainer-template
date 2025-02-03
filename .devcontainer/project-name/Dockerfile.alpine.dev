@@ -12,14 +12,14 @@ RUN apk add ripgrep fd
 
 RUN apk add neovim
 
-RUN cd ~ && \
+RUN cd $HOME && \
     git clone --recursive --bare --depth=1 https://github.com/nnishant776/dotfiles $HOME/.dotfiles && \
     git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout main -- .bashrc .profile .local/share/bash && \
-    rm -rf ~/.dotfiles
+    rm -rf $HOME/.dotfiles
 
-RUN cd ~ && \
-    rm -rf ~/.config/nvim && \
-    git clone --recursive --depth=1 https://github.com/nnishant776/init.lua ~/.config/nvim
+RUN cd $HOME && \
+    rm -rf $HOME/.config/nvim && \
+    git clone --recursive --depth=1 https://github.com/nnishant776/init.lua $HOME/.config/nvim
 
 RUN go install "github.com/cweill/gotests/gotests@latest" && \
     go install "github.com/fatih/gomodifytags@latest" && \
