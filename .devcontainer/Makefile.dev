@@ -63,19 +63,23 @@ _prebuild: _validations
 	rm -rf $(project_name)
 
 	cp -r project-name/ $(project_name)/
-ifeq ($(minimal), true)
-	cp $(project_name)/Dockerfile.alpine.dev $(project_name)/Dockerfile.dev
-	cp $(project_name)/Dockerfile.alpine.base $(project_name)/Dockerfile.base
-else
-	cp $(project_name)/Dockerfile.debian.dev $(project_name)/Dockerfile.dev
-	cp $(project_name)/Dockerfile.debian.base $(project_name)/Dockerfile.base
-endif
-
-	mkdir -p project-name/project-name
-	cp project-name/Makefile project-name/project-name/
 
 	mkdir -p $(project_name)/$(project_name)
-	cp $(project_name)/Makefile $(project_name)/$(project_name)/
+	mkdir -p project-name/project-name
+
+ifeq ($(minimal), true)
+	cp project-name/Makefile.alpine project-name/project-name/Makefile
+	cp $(project_name)/Dockerfile.alpine.dev $(project_name)/Dockerfile.dev
+	cp $(project_name)/Dockerfile.alpine.base $(project_name)/Dockerfile.base
+	cp $(project_name)/Makefile.alpine $(project_name)/$(project_name)/Makefile
+	cp $(project_name)/Makefile.alpine $(project_name)/Makefile
+else
+	cp project-name/Makefile.debian project-name/project-name/Makefile
+	cp $(project_name)/Dockerfile.debian.dev $(project_name)/Dockerfile.dev
+	cp $(project_name)/Dockerfile.debian.base $(project_name)/Dockerfile.base
+	cp $(project_name)/Makefile.debian $(project_name)/$(project_name)/Makefile
+	cp $(project_name)/Makefile.debian $(project_name)/Makefile
+endif
 
 	cp devcontainer.template.json devcontainer.json
 	cp docker-compose.template.yaml docker-compose.yaml

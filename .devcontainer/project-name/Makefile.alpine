@@ -1,0 +1,34 @@
+postcreate: envconfig editor devtools
+
+envconfig:
+	cd $$HOME && \
+	git clone --recursive --bare --depth=1 https://github.com/nnishant776/dotfiles $$HOME/.dotfiles && \
+	git --git-dir=$$HOME/.dotfiles --work-tree=$$HOME checkout main -- .bashrc .profile .local/share/bash && \
+	rm -rf $$HOME/.dotfiles
+
+editorconfig:
+	cd $$HOME && \
+	rm -rf $$HOME/.config/nvim && \
+	git clone --recursive --depth=1 -b dev https://github.com/nnishant776/init.lua $$HOME/.config/nvim
+
+editortools:
+	apk add ripgrep fd
+
+gittools:
+	apk add github-cli
+
+devtools:
+	go install "github.com/cweill/gotests/gotests@latest"
+	go install "github.com/fatih/gomodifytags@latest"
+	go install "github.com/josharian/impl@latest"
+	go install "honnef.co/go/tools/cmd/staticcheck@latest"
+	go install "golang.org/x/tools/gopls@latest"
+	go install "github.com/segmentio/golines@latest"
+	go install "golang.org/x/tools/cmd/goimports@latest"
+	go install "github.com/golang/mock/mockgen@latest"
+
+editorapp:
+	apk add neovim
+
+editor: editorconfig editortools editorapp
+	env features=ide nvim --headless "+Lazy restore" "+TSUpdateSync" "+qa"
