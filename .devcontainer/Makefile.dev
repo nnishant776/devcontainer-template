@@ -116,14 +116,25 @@ endif
 	sed '1d' $(project_name)/Dockerfile.dev >> $(project_name)/Dockerfile
 
 baseimage: _prebuild
-	$(runtime) inspect localhost/$(project_name):dev 2>&1 > /dev/null && exit 0 || \
-	$(runtime) inspect localhost/project-name:dev 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:dev localhost/$(project_name):dev && exit 0 || \
-	$(runtime) inspect localhost/project-name:base 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:base localhost/$(project_name):base && \
-	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev -t localhost/$(project_name):dev . && exit 0 || \
-	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base -t localhost/$(project_name):base . && \
-	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev -t localhost/$(project_name):dev .
+ifeq ($(minimal),true)
+	$(runtime) inspect localhost/$(project_name):dev-minimal 2>&1 > /dev/null && exit 0 || \
+	$(runtime) inspect localhost/project-name:dev-minimal 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:dev-minimal localhost/$(project_name):dev-minimal && exit 0 || \
+	$(runtime) inspect localhost/project-name:base-minimal 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:base-minimal localhost/$(project_name):base-minimal && \
+	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal . && exit 0 || \
+	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-minimal -t localhost/$(project_name):base-minimal . && \
+	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .
+else
+	$(runtime) inspect localhost/$(project_name):dev-full 2>&1 > /dev/null && exit 0 || \
+	$(runtime) inspect localhost/project-name:dev-full 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:dev-full localhost/$(project_name):dev-full && exit 0 || \
+	$(runtime) inspect localhost/project-name:base-full 2>&1 > /dev/null && \
+	$(runtime) tag localhost/project-name:base-full localhost/$(project_name):base-full && \
+	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-full -t localhost/$(project_name):dev-full . && exit 0 || \
+	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-full -t localhost/$(project_name):base-full . && \
+	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-full -t localhost/$(project_name):dev-full .
+endif
 
 _makegen: _prebuild
 	rm -f Makefile
@@ -228,8 +239,13 @@ endif
 # envpurge: ...
 	printf "\nenvpurge: envdestroy\n" >> Makefile
 ifeq ($(editor), cli)
-	printf "\t$(runtime) image rm localhost/$(project_name):dev\n" >> Makefile
-	printf "\t$(runtime) image rm localhost/$(project_name):base\n" >> Makefile
+ifeq ($(minimal),true)
+	printf "\t$(runtime) image rm localhost/$(project_name):dev-minimal\n" >> Makefile
+	printf "\t$(runtime) image rm localhost/$(project_name):base-minimal\n" >> Makefile
+else
+	printf "\t$(runtime) image rm localhost/$(project_name):dev-full\n" >> Makefile
+	printf "\t$(runtime) image rm localhost/$(project_name):base-full\n" >> Makefile
+endif
 else
 	# $(runtime) container rm vscode-$(container_name)
 endif
