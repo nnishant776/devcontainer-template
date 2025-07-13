@@ -117,23 +117,35 @@ endif
 
 baseimage: _prebuild
 ifeq ($(minimal),true)
-	$(runtime) inspect localhost/$(project_name):dev-minimal 2>&1 > /dev/null && exit 0 || \
-	$(runtime) inspect localhost/project-name:dev-minimal 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:dev-minimal localhost/$(project_name):dev-minimal && exit 0 || \
-	$(runtime) inspect localhost/project-name:base-minimal 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:base-minimal localhost/$(project_name):base-minimal && \
-	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal . && exit 0 || \
-	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-minimal -t localhost/$(project_name):base-minimal . && \
-	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .
+	if $(runtime) inspect localhost/$(project_name):dev-minimal 2>&1 > /dev/null; then \
+		echo "Image localhost/$(project_name):dev-minimal already exists. Skipping creation"; \
+	elif $(runtime) inspect localhost/project-name:dev-minimal 2>&1 > /dev/null; then \
+		echo "localhost/project-name:dev-minimal exists. Tagging localhost/$(project_name):dev-minimal" && \
+		$(runtime) tag localhost/project-name:dev-minimal localhost/$(project_name):dev-minimal; \
+	elif $(runtime) inspect localhost/project-name:base-minimal 2>&1 > /dev/null; then \
+		echo "localhost/project-name:base-minimal exists. Tagging localhost/$(project_name):base-minimal and localhost/$(project_name):dev-minimal" && \
+		$(runtime) tag localhost/project-name:base-minimal localhost/$(project_name):base-minimal && \
+		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .; \
+	else \
+		echo "No base and dev images found. Building images and tagging" && \
+		$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-minimal -t localhost/$(project_name):base-minimal . && \
+		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .; \
+	fi
 else
-	$(runtime) inspect localhost/$(project_name):dev-full 2>&1 > /dev/null && exit 0 || \
-	$(runtime) inspect localhost/project-name:dev-full 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:dev-full localhost/$(project_name):dev-full && exit 0 || \
-	$(runtime) inspect localhost/project-name:base-full 2>&1 > /dev/null && \
-	$(runtime) tag localhost/project-name:base-full localhost/$(project_name):base-full && \
-	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-full -t localhost/$(project_name):dev-full . && exit 0 || \
-	$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-full -t localhost/$(project_name):base-full . && \
-	$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-full -t localhost/$(project_name):dev-full .
+	if $(runtime) inspect localhost/$(project_name):dev-minimal 2>&1 > /dev/null; then \
+		echo "Image localhost/$(project_name):dev-minimal already exists. Skipping creation"; \
+	elif $(runtime) inspect localhost/project-name:dev-minimal 2>&1 > /dev/null; then \
+		echo "localhost/project-name:dev-minimal exists. Tagging localhost/$(project_name):dev-minimal" && \
+		$(runtime) tag localhost/project-name:dev-minimal localhost/$(project_name):dev-minimal; \
+	elif $(runtime) inspect localhost/project-name:base-minimal 2>&1 > /dev/null; then \
+		echo "localhost/project-name:base-minimal exists. Tagging localhost/$(project_name):base-minimal and localhost/$(project_name):dev-minimal" && \
+		$(runtime) tag localhost/project-name:base-minimal localhost/$(project_name):base-minimal && \
+		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .; \
+	else \
+		echo "No base and dev images found. Building images and tagging" && \
+		$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-minimal -t localhost/$(project_name):base-minimal . && \
+		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .; \
+	fi
 endif
 
 _makegen: _prebuild
