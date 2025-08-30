@@ -112,8 +112,10 @@ endif
 		sed -i "s|user-home|$${HOME}|g" $$file || true ; \
 	done
 
+ifneq ($(optimized),true)
 	cat $(project_name)/Dockerfile.base > $(project_name)/Dockerfile
 	sed '1d' $(project_name)/Dockerfile.dev >> $(project_name)/Dockerfile
+endif
 
 baseimage: _prebuild
 ifeq ($(minimal),true)
@@ -131,21 +133,23 @@ ifeq ($(minimal),true)
 		$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-minimal -t localhost/$(project_name):base-minimal . && \
 		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .; \
 	fi
+		$(runtime) tag localhost/$(project_name):dev-minimal localhost/$(project_name):dev
 else
-	if $(runtime) inspect localhost/$(project_name):dev-minimal 2>&1 > /dev/null; then \
-		echo "Image localhost/$(project_name):dev-minimal already exists. Skipping creation"; \
-	elif $(runtime) inspect localhost/project-name:dev-minimal 2>&1 > /dev/null; then \
-		echo "localhost/project-name:dev-minimal exists. Tagging localhost/$(project_name):dev-minimal" && \
-		$(runtime) tag localhost/project-name:dev-minimal localhost/$(project_name):dev-minimal; \
-	elif $(runtime) inspect localhost/project-name:base-minimal 2>&1 > /dev/null; then \
-		echo "localhost/project-name:base-minimal exists. Tagging localhost/$(project_name):base-minimal and localhost/$(project_name):dev-minimal" && \
-		$(runtime) tag localhost/project-name:base-minimal localhost/$(project_name):base-minimal && \
-		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .; \
+	if $(runtime) inspect localhost/$(project_name):dev-full 2>&1 > /dev/null; then \
+		echo "Image localhost/$(project_name):dev-full already exists. Skipping creation"; \
+	elif $(runtime) inspect localhost/project-name:dev-full 2>&1 > /dev/null; then \
+		echo "localhost/project-name:dev-full exists. Tagging localhost/$(project_name):dev-full" && \
+		$(runtime) tag localhost/project-name:dev-full localhost/$(project_name):dev-full; \
+	elif $(runtime) inspect localhost/project-name:base-full 2>&1 > /dev/null; then \
+		echo "localhost/project-name:base-full exists. Tagging localhost/$(project_name):base-full and localhost/$(project_name):dev-full" && \
+		$(runtime) tag localhost/project-name:base-full localhost/$(project_name):base-full && \
+		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-full -t localhost/$(project_name):dev-full .; \
 	else \
 		echo "No base and dev images found. Building images and tagging" && \
-		$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-minimal -t localhost/$(project_name):base-minimal . && \
-		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-minimal -t localhost/$(project_name):dev-minimal .; \
+		$(runtime) build -f project-name/Dockerfile.base -t localhost/project-name:base-full -t localhost/$(project_name):base-full . && \
+		$(runtime) build -f project-name/Dockerfile.dev -t localhost/project-name:dev-full -t localhost/$(project_name):dev-full .; \
 	fi
+		$(runtime) tag localhost/$(project_name):dev-full localhost/$(project_name):dev
 endif
 
 _makegen: _prebuild
@@ -250,6 +254,7 @@ endif
 
 # envpurge: ...
 	printf "\nenvpurge: envdestroy\n" >> Makefile
+	printf "\t$(runtime) image rm localhost/$(project_name):dev\n" >> Makefile
 ifeq ($(editor), cli)
 ifeq ($(minimal),true)
 	printf "\t$(runtime) image rm localhost/$(project_name):dev-minimal\n" >> Makefile
